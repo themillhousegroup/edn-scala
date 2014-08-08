@@ -27,19 +27,32 @@ class SimpleUsageSpec extends Specification {
     }
   }
 
-  "Using the Scala parser's strongly-typed nextValue method" should {
+  "Using the Scala EDN parser's strongly-typed nextValue method on simple values" should {
 
     "Provide typed Some responses when values are found" in {
       val p = EDNParser(defaultConfiguration)
 
-      val simpleValues = parse(" :a 1 :b 2 :c 3")
+      val values = parse(" :a 1 :b 2 :c 3")
 
-      p.nextValue[Keyword](simpleValues) must beSome(newKeyword("a"))
-      p.nextValue[Int](simpleValues) must beSome(1L)
-      p.nextValue[Keyword](simpleValues) must beSome(newKeyword("b"))
-      p.nextValue[Int](simpleValues) must beSome(2L)
-      p.nextValue[Keyword](simpleValues) must beSome(newKeyword("c"))
-      p.nextValue[Int](simpleValues) must beSome(3L)
+      p.nextValue[Keyword](values) must beSome(newKeyword("a"))
+      p.nextValue[Int](values) must beSome(1L)
+      p.nextValue[Keyword](values) must beSome(newKeyword("b"))
+      p.nextValue[Int](values) must beSome(2L)
+      p.nextValue[Keyword](values) must beSome(newKeyword("c"))
+      p.nextValue[Int](values) must beSome(3L)
+    }
+
+    "Support various forms of key identifiers and values" in {
+      val p = EDNParser(defaultConfiguration)
+
+      val values = parse(""" :a 1 :b? true :c "localhost" """)
+
+      p.nextValue[Keyword](values) must beSome(newKeyword("a"))
+      p.nextValue[Int](values) must beSome(1L)
+      p.nextValue[Keyword](values) must beSome(newKeyword("b?"))
+      p.nextValue[Boolean](values) must beSome(true)
+      p.nextValue[Keyword](values) must beSome(newKeyword("c"))
+      p.nextValue[String](values) must beSome("localhost")
     }
 
     "Provide a None response for an empty Parseable" in {
@@ -59,7 +72,5 @@ class SimpleUsageSpec extends Specification {
       p.nextValue[Int](values) must beSome(99L)
       p.nextValue[Int](values) must beNone
     }
-
-
   }
 }
