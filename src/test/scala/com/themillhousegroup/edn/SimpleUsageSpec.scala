@@ -30,7 +30,7 @@ class SimpleUsageSpec extends Specification {
   "Using the Scala EDN parser's strongly-typed nextValue method on simple values" should {
 
     "Provide typed Some responses when values are found" in {
-      val p = EDNParser(defaultConfiguration)
+      val p = EDNParser()
 
       val values = parse(" :a 1 :b 2 :c 3")
 
@@ -43,7 +43,7 @@ class SimpleUsageSpec extends Specification {
     }
 
     "Support various forms of key identifiers and values" in {
-      val p = EDNParser(defaultConfiguration)
+      val p = EDNParser()
 
       val values = parse(""" :a 1 :b? true :c "localhost" """)
 
@@ -56,7 +56,7 @@ class SimpleUsageSpec extends Specification {
     }
 
     "Provide a None response for an empty Parseable" in {
-      val p = EDNParser(defaultConfiguration)
+      val p = EDNParser()
 
       val empty = parse("")
 
@@ -64,7 +64,7 @@ class SimpleUsageSpec extends Specification {
     }
 
     "Provide a None response when running off the end of a Parseable" in {
-      val p = EDNParser(defaultConfiguration)
+      val p = EDNParser()
 
       val values = parse(":f 99")
 
