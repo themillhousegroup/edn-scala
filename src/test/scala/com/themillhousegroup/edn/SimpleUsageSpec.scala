@@ -5,11 +5,10 @@ import us.bpsm.edn.parser._
 import us.bpsm.edn.parser.Parsers._
 import us.bpsm.edn.Keyword._
 import us.bpsm.edn.Keyword
+import com.themillhousegroup.edn.test.EDNParsing
 
 
-class SimpleUsageSpec extends Specification {
-
-  def parse(s:String) = Parsers.newParseable(s)
+class SimpleUsageSpec extends Specification with EDNParsing {
 
   val pbr = parse("{:x 1, :y 2}")
 
@@ -29,10 +28,7 @@ class SimpleUsageSpec extends Specification {
 
   "Using the Scala EDN parser's strongly-typed nextValue method on simple values" should {
 
-    "Provide typed Some responses when values are found" in {
-      val p = EDNParser()
-
-      val values = parse(" :a 1 :b 2 :c 3")
+    "Provide typed Some responses when values are found" in new ParserScope(" :a 1 :b 2 :c 3") {
 
       p.nextValue[Keyword](values) must beSome(newKeyword("a"))
       p.nextValue[Int](values) must beSome(1L)
@@ -42,10 +38,7 @@ class SimpleUsageSpec extends Specification {
       p.nextValue[Int](values) must beSome(3L)
     }
 
-    "Support various forms of key identifiers and values" in {
-      val p = EDNParser()
-
-      val values = parse(""" :a 1 :b? true :c "localhost" """)
+    "Support various forms of key identifiers and values" in new ParserScope(""" :a 1 :b? true :c "localhost" """) {
 
       p.nextValue[Keyword](values) must beSome(newKeyword("a"))
       p.nextValue[Int](values) must beSome(1L)
@@ -55,18 +48,12 @@ class SimpleUsageSpec extends Specification {
       p.nextValue[String](values) must beSome("localhost")
     }
 
-    "Provide a None response for an empty Parseable" in {
-      val p = EDNParser()
+    "Provide a None response for an empty Parseable" in new ParserScope("") {
 
-      val empty = parse("")
-
-      p.nextValue[Int](empty) must beNone
+      p.nextValue[Int](values) must beNone
     }
 
-    "Provide a None response when running off the end of a Parseable" in {
-      val p = EDNParser()
-
-      val values = parse(":f 99")
+    "Provide a None response when running off the end of a Parseable" in new ParserScope(":f 99") {
 
       p.nextValue[Keyword](values) must beSome(newKeyword("f"))
       p.nextValue[Int](values) must beSome(99L)
