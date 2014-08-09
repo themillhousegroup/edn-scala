@@ -49,8 +49,11 @@ class ScalaEDNParser(config:Config) {
   private def streamCollection(a:AnyRef):AnyRef = {
     import scala.collection.JavaConverters._
     a match {
-      case m:java.util.Map[Keyword,AnyRef] => {
-        m.asScala.toStream.map { case (k, v) => k.getName -> streamCollection(v)}
+      case m:java.util.Map[AnyRef,AnyRef] => {
+        m.asScala.toStream.map {
+          case (k:Keyword, v) => k.getName -> streamCollection(v)
+          case (s:String, v) => s -> streamCollection(v)
+        }
       }
       case m:java.util.List[AnyRef] => {
         m.asScala.toStream.map(streamCollection)

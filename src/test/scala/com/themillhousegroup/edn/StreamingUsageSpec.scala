@@ -1,27 +1,9 @@
 package com.themillhousegroup.edn
 
 import org.specs2.mutable.Specification
-import com.themillhousegroup.edn.test.EDNParsing
+import com.themillhousegroup.edn.test.{StreamChecking, EDNParsing}
 
-class StreamingUsageSpec extends Specification with EDNParsing {
-
-  def valueStreamMustHave[T](stream:Stream[T], items:T*) = {
-    val s = stream.toSeq
-    s must haveSize(items.size)
-    s must containTheSameElementsAs(items)
-  }
-
-  def keyStreamMustHave(stream:Stream[(String, AnyRef)], items:String*) = {
-    val s = stream.toSeq
-    s must haveSize(items.size)
-    s.map { case (k, v) => k } must containTheSameElementsAs(items)
-  }
-
-  def keyValueStreamMustHave(stream:Stream[(String, AnyRef)], items:(String, _)*) = {
-    val s = stream.toSeq
-    s must haveSize(items.size)
-    s must containTheSameElementsAs(items)
-  }
+class StreamingUsageSpec extends Specification with EDNParsing with StreamChecking {
 
   "Using the Streaming Scala EDN parser" should {
 
