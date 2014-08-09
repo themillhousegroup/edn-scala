@@ -127,17 +127,15 @@ class StreamingUsageSpec extends Specification with EDNParsing {
       )
     }
 
+    "Allow iteration over an EDN expressed as a map" in new ParserScope(""" {:a 1 :b "foo" :c? true }""") {
 
-//    "Allow iteration over an EDN expressed as a map" in new ParserScope(""" {:a 1 :b "foo" :c? true }""") {
-//
-//      val s = p.asStream(values).toSeq
-//
-//      s must haveSize(3)
-//
-//      s(0) must beEqualTo("a" -> 1)
-//      s(1) must beEqualTo("b" -> "foo")
-//      s(2) must beEqualTo("c?" -> true)
-//    }
+      val s = p.asStream(values).toSeq
+      // As per comments on asStream - we view this as a map that happens to have an empty label
+      s must haveSize(1)
+      s.head._1 must beEqualTo("")
+      val nestedStream = s.head._2.asInstanceOf[Stream[(String, AnyRef)]]
+      keyValueStreamMustHave(nestedStream, "a" -> 1, "b" -> "foo" , "c?" -> true)
+    }
   }
 
 }

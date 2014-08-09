@@ -63,18 +63,25 @@ class ScalaEDNParser(config:Config) {
   }
 
 
-  /** Treat an EDN file as if it was a Stream of key-value tuples.
+  /** Treat an EDN block as if it was a Stream of key-value tuples.
     * This may be suitable if you are dealing with an extremely large
     * Parseable instance and are worried about memory usage.
     * Nested collections will appear as a (String, Stream) tuple
-    * within the parent stream */
+    * within the parent stream.
+    * If the entire EDN block is contained within {}, then
+    * it will be treated as a Stream with one tuple, "" -> (the content) */
   def asStream(pbr: Parseable):Stream[(String, AnyRef)] = {
+
     Stream.continually(
       javaParser.nextValue(pbr))
           .takeWhile (!isFinished(_)).sliding(2,2).map { pair =>
-      val k = pair.head.asInstanceOf[Keyword]
-      val v = streamCollection(pair(1))
-      k.getName -> v
+      if (pair.head.isInstanceOf[Keyword]) {
+        val k = pair.head.asInstanceOf[Keyword]
+        val v = streamCollection(pair(1))
+        k.getName -> v
+      } else {
+        "" -> streamCollection(pair.head)
+      }
     }.toStream
   }
 
