@@ -29,7 +29,7 @@ you can read such a file into your Scala code as a
 
 
 ## Getting Started
-    - Bring in the library by adding the release repository and the dependency to your ```build.sbt```:
+  - Bring in the library by adding the release repository and the dependency to your ```build.sbt```:
 
 ```
    resolvers ++= Seq(
@@ -44,25 +44,36 @@ you can read such a file into your Scala code as a
 
 ## Usage
 
-There are three ways you can use this library; they will be presented in order of ease-of-use.
+#### Getting a ```Parseable```
 
-### Treating the edn data as a ```Map[String, AnyRef]```
-You've already seen an example of this usage pattern above. Supply a ```scala.io.Source```
-(or use the implicit in ```ParseableSource``` to open one from a filename) to ```asMap()```.
+A ```Parseable``` is the interface defined by *edn-java* as the basis of all operation. From *edn-scala*
+you really don't need to know much about it because if you ```import com.themillhousegroup.edn.ParseableSource._```
+you get implicits defined to automatically get a ```Parseable``` from either a ```scala.io.Source``` or a simple
+```String``` representing a filename.
+
+Once you have a ```Parseable```, there are three ways you can use this library; they will be presented in order of ease-of-use.
+
+#### Treating the edn data as a ```Map[String, AnyRef]```
+You've already seen an example of this usage pattern above.
+Get an ```EDNParser``` instance by calling ```EDNParser()``` and then pass the ```Parseable``` to ```asMap()```.
+
+This is by far the most straightforward way to start woking with EDN data from Scala, because once you've got a ```Map```, you can
+do all the idiomatic Scala things with it.
 
 Remember that any maps _within_ the top-level map will also be of type ```Map[String, AnyRef]```.
 You'll need to cast individual elements using ```asInstanceOf[T]``` to get type-safe access to them.
 
-### Treating the edn data as a ```Stream[(String, AnyRef)]```
-If you're working with very large EDN structures, it might be more efficient to treat them as a stream of
-```(String, AnyRef)``` tuples.
+#### Treating the edn data as a ```Stream[(String, AnyRef)]```
+If you're working with *very large* EDN structures, it might be more efficient to treat them as a stream of
+```(String, AnyRef)``` tuples. To do this:
 
-### The basic ```nextValue()``` mode
+```EDNParser().asStream( parseable ) ```
+
+
+#### The basic ```nextValue()``` mode
 This is the "thinnest" wrapper around the Java API; it just gives you an ```Option[T]``` for the next value found in
 the EDN data. You'll get a ```None``` if we've got to the end of the data, and a ```ClassCastException``` if the type coercion
 didn't work.
 
-
-This library is currently a work-in-progress, as is (apparently) *edn-java* so don't expect much until a public artifact location is listed here.
-
-
+Unless you've found a bug in the ```asMap``` or ```asStream``` functions (in which case, raise an issue!), there is very little reason why you would want to
+resort to using this access mode.
