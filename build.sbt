@@ -2,7 +2,7 @@ name := "edn-scala"
 
 organization := "com.themillhousegroup"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 scalaVersion := "2.10.2"
 
@@ -13,4 +13,8 @@ libraryDependencies ++= Seq (
 )
 
 jacoco.settings
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
+publishTo := Some("Cloudbees releases" at "https://repository-themillhousegroup.forge.cloudbees.com/"+ "release")
 
