@@ -52,19 +52,23 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
       list must containTheSameElementsAs(Seq(2, 4, 6, 8))
     }
 
-//    "Allow clients to select individual keys" in {
-//
-//      val nestedExample = Parsers.newParseable(
-//              """ { :x 1,
-//                :y 2
-//                :z { :foo 11 :bar 12 :baz 13}
-//          } """
-//      )
-//
-//      val p = EDNParser()
-//      val m = p.asMap(nestedExample)
-//      true must beTrue
-//    }
+    "Consider an anonymously-labelled root map to be the top-level" in new ParserScope (
+      """ { :x 1,
+            :y 2
+            :z { :foo 11 :bar 12 :baz 13}
+          } """ ) {
+
+
+      val m = p.asMap(values)
+      m must haveSize(3)
+
+      m must haveKeys("x","y", "z")
+
+      m("z") must beAnInstanceOf[Map[String, AnyRef]]
+
+      val zMap = m("z").asInstanceOf[Map[String, AnyRef]]
+      zMap must haveKeys("foo", "bar", "baz")
+    }
  }
 
 }

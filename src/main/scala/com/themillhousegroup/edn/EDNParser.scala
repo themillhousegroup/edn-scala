@@ -5,6 +5,7 @@ import us.bpsm.edn.parser.Parsers._
 import us.bpsm.edn.Keyword._
 import us.bpsm.edn.parser.Parser.Config
 import us.bpsm.edn.Keyword
+import scala.collection.IterableLike
 
 object EDNParser {
 
@@ -28,6 +29,10 @@ class ScalaEDNParser(config:Config) {
 
   private def isFinished(o:AnyRef) = Parser.END_OF_INPUT.equals(o)
 
+  private def immutableMap(m:Traversable[(String,AnyRef)]) = {
+    Map[String, AnyRef]() ++ m
+  }
+
   /** A simple wrapper around the basic Java interface,
     * this method keeps returning Some(T) until all values are exhausted
     */
@@ -41,12 +46,33 @@ class ScalaEDNParser(config:Config) {
     }
   }
 
-  /** We recurse here wherever there is a chance
-    * that a nested object could be another
-    * collection that needs streaming.
-    * The termination case is when we find a simple object.
-    */
+//  /** We recurse here wherever there is a chance
+//    * that a nested object could be another
+//    * collection that needs processing.
+//    * The termination case is when we find a simple object.
+//    */
+//  private def recurseIntoCollections(a:AnyRef)(collectionModifier:Traversable[AnyRef]=>Traversable[AnyRef])(recursionFunction:AnyRef=>AnyRef):AnyRef = {
+//    import scala.collection.JavaConverters._
+//    a match {
+//      case m:java.util.Map[AnyRef,AnyRef] => {
+//        collectionModifier(m.asScala).map {
+//          case (k:Keyword, v:AnyRef) => k.getName -> recursionFunction(v)
+//          case (s:String, v:AnyRef) => s -> recursionFunction(v)
+//        }
+//      }
+//      case m:java.util.List[AnyRef] => {
+//        collectionModifier(m.asScala).map(recursionFunction)
+//      }
+//      case m:java.util.Set[AnyRef] => {
+//        collectionModifier(m.asScala).map(recursionFunction)
+//      }
+//      case o => o
+//    }
+//  }
+
+
   private def streamCollection(a:AnyRef):AnyRef = {
+
     import scala.collection.JavaConverters._
     a match {
       case m:java.util.Map[AnyRef,AnyRef] => {
@@ -65,11 +91,8 @@ class ScalaEDNParser(config:Config) {
     }
   }
 
-  private def immutableMap(m:Traversable[(String,AnyRef)]) = {
-    Map[String, AnyRef]() ++ m
-  }
-
   private def convertCollection(a:AnyRef):AnyRef = {
+
     import scala.collection.JavaConverters._
     a match {
       case m:java.util.Map[AnyRef,AnyRef] => {
@@ -88,7 +111,7 @@ class ScalaEDNParser(config:Config) {
     }
   }
 
-  def processParseable(pbr:Parseable)(valueMapper:AnyRef=>AnyRef):Iterator[(String, AnyRef)] = {
+  private def processParseable(pbr:Parseable)(valueMapper:AnyRef=>AnyRef):Iterator[(String, AnyRef)] = {
     Stream.continually(
       javaParser.nextValue(pbr))
       .takeWhile (!isFinished(_)).sliding(2,2).map { pair =>
@@ -118,8 +141,19 @@ class ScalaEDNParser(config:Config) {
     * Otherwise, there can be nested Map[String, AnyRef],
     * Set[AnyRef] or Seq[AnyRef] collections nested inside.
     *
+    * If the entire EDN block is contained within {}, then
+    * this "single-entry Map" will be dereferenced for convenience;
+    * so for example:
+    * { :x 1 :y 2 :z 3 } will result in a Map of size 3, rather
+    * than a Map with one entry of "" -> (Map of size 3)
     */
   def asMap(pbr: Parseable):Map[String, AnyRef] = {
-    immutableMap(processParseable(pbr)(convertCollection).toTraversable)
+    val m = immutableMap(processParseable(pbr)(convertCollection).toTraversable)
+
+    // Special case for the "root" map (if it exists)
+    if (m.size == 1 && (m.forall { case (s, a) =>
+      s.isEmpty && a.isInstanceOf[Map[String, AnyRef]]} )) {
+      m.head._2.asInstanceOf[Map[String, AnyRef]]
+    } else m
   }
 }
