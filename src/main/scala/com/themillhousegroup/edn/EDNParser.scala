@@ -17,7 +17,6 @@ object EDNParser {
     new ScalaEDNParser(config)
   }
 
-
   implicit def str2keyword(s:String):Keyword = newKeyword(s)
   implicit def sym2keyword(s:Symbol):Keyword = newKeyword(s.name)
 
@@ -29,8 +28,8 @@ class ScalaEDNParser(config:Config) {
 
   private def isFinished(o:AnyRef) = Parser.END_OF_INPUT.equals(o)
 
-  private def immutableMap(m:Traversable[(String,AnyRef)]) = {
-    Map[String, AnyRef]() ++ m
+  private def immutableMap[K, V](m:Traversable[(K,V)]) = {
+    Map[K, V]() ++ m
   }
 
   /** A simple wrapper around the basic Java interface,
@@ -46,69 +45,39 @@ class ScalaEDNParser(config:Config) {
     }
   }
 
-//  /** We recurse here wherever there is a chance
-//    * that a nested object could be another
-//    * collection that needs processing.
-//    * The termination case is when we find a simple object.
-//    */
-//  private def recurseIntoCollections(a:AnyRef)(collectionModifier:Traversable[AnyRef]=>Traversable[AnyRef])(recursionFunction:AnyRef=>AnyRef):AnyRef = {
-//    import scala.collection.JavaConverters._
-//    a match {
-//      case m:java.util.Map[AnyRef,AnyRef] => {
-//        collectionModifier(m.asScala).map {
-//          case (k:Keyword, v:AnyRef) => k.getName -> recursionFunction(v)
-//          case (s:String, v:AnyRef) => s -> recursionFunction(v)
-//        }
-//      }
-//      case m:java.util.List[AnyRef] => {
-//        collectionModifier(m.asScala).map(recursionFunction)
-//      }
-//      case m:java.util.Set[AnyRef] => {
-//        collectionModifier(m.asScala).map(recursionFunction)
-//      }
-//      case o => o
-//    }
-//  }
-
-
-  private def streamCollection(a:AnyRef):AnyRef = {
+  /** We recurse here wherever there is a chance
+    * that a nested object could be another
+    * collection that needs processing.
+    * The termination case is when we find a simple object.
+    */
+  private def handleCollections(a:AnyRef)
+                               (mapHandler:Map[AnyRef, AnyRef]=>Traversable[(String, AnyRef)])
+                               (traversableHandler:Traversable[AnyRef]=>Traversable[AnyRef]):AnyRef = {
 
     import scala.collection.JavaConverters._
     a match {
-      case m:java.util.Map[AnyRef,AnyRef] => {
-        m.asScala.toStream.map {
-          case (k:Keyword, v) => k.getName -> streamCollection(v)
-          case (s:String, v) => s -> streamCollection(v)
-        }
-      }
-      case m:java.util.List[AnyRef] => {
-        m.asScala.toStream.map(streamCollection)
-      }
-      case m:java.util.Set[AnyRef] => {
-        m.asScala.toStream.map(streamCollection)
-      }
+      case m:java.util.Map[AnyRef,AnyRef] => { mapHandler(immutableMap(m.asScala)) }
+      case m:java.util.List[AnyRef] => { traversableHandler(m.asScala) }
+      case m:java.util.Set[AnyRef] => { traversableHandler(m.asScala)}
       case o => o
     }
   }
 
+
+  private def streamCollection(a:AnyRef):AnyRef = {
+
+    handleCollections(a){ _.toStream.map {
+      case (k:Keyword, v) => k.getName -> streamCollection(v)
+      case (s:String, v) => s -> streamCollection(v)
+    }}( _.toStream.map(convertCollection) )
+  }
+
   private def convertCollection(a:AnyRef):AnyRef = {
 
-    import scala.collection.JavaConverters._
-    a match {
-      case m:java.util.Map[AnyRef,AnyRef] => {
-        immutableMap(m.asScala.map {
-          case (k:Keyword, v) => k.getName -> convertCollection(v)
-          case (s:String, v) => s -> convertCollection(v)
-        })
-      }
-      case m:java.util.List[AnyRef] => {
-        m.asScala.map(convertCollection)
-      }
-      case m:java.util.Set[AnyRef] => {
-        m.asScala.map(convertCollection)
-      }
-      case o => o
-    }
+    handleCollections(a){ _.map {
+        case (k:Keyword, v) => k.getName -> convertCollection(v)
+        case (s:String, v) => s -> convertCollection(v)
+      }}( _.map(convertCollection) )
   }
 
   private def processParseable(pbr:Parseable)(valueMapper:AnyRef=>AnyRef):Iterator[(String, AnyRef)] = {
