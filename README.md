@@ -27,6 +27,42 @@ you can read such a file into your Scala code as a
 ## Credits
   - Obviously, the [edn-java](https://github.com/bpsm/edn-java) library is the thing doing the heavy-lifting here.
 
+
+## Getting Started
+    - Bring in the library by adding the release repository and the dependency to your ```build.sbt```:
+
+```
+   resolvers ++= Seq(
+     "millhouse-releases" at "http://repository-themillhousegroup.forge.cloudbees.com/release"
+   )
+
+   libraryDependencies ++= Seq(
+     "com.themillhousegroup" %% "edn-scala" % "1.0"
+   )
+
+```
+
+## Usage
+
+There are three ways you can use this library; they will be presented in order of ease-of-use.
+
+### Treating the edn data as a ```Map[String, AnyRef]```
+You've already seen an example of this usage pattern above. Supply a ```scala.io.Source```
+(or use the implicit in ```ParseableSource``` to open one from a filename) to ```asMap()```.
+
+Remember that any maps _within_ the top-level map will also be of type ```Map[String, AnyRef]```.
+You'll need to cast individual elements using ```asInstanceOf[T]``` to get type-safe access to them.
+
+### Treating the edn data as a ```Stream[(String, AnyRef)]```
+If you're working with very large EDN structures, it might be more efficient to treat them as a stream of
+```(String, AnyRef)``` tuples.
+
+### The basic ```nextValue()``` mode
+This is the "thinnest" wrapper around the Java API; it just gives you an ```Option[T]``` for the next value found in
+the EDN data. You'll get a ```None``` if we've got to the end of the data, and a ```ClassCastException``` if the type coercion
+didn't work.
+
+
 This library is currently a work-in-progress, as is (apparently) *edn-java* so don't expect much until a public artifact location is listed here.
 
 
