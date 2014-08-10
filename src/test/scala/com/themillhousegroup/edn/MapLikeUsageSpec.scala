@@ -52,6 +52,23 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
       list must containTheSameElementsAs(Seq(2, 4, 6, 8))
     }
 
+    "Handle simple strings rather than keywords" in new ParserScope(
+      """  :x 1, "y" 2  :z [ 2 4 6 8 ] """  ) {
+
+      val m = p.asMap(values)
+
+      m must haveSize(3)
+
+      m must havePairs("x" -> 1, "y" -> 2)
+
+      println(m("z").getClass)
+
+      val list = m("z").asInstanceOf[Seq[Int]]
+      list must haveSize(4)
+
+      list must containTheSameElementsAs(Seq(2, 4, 6, 8))
+    }
+
     "Consider an anonymously-labelled root map to be the top-level" in new ParserScope (
       """ { :x 1,
             :y 2
