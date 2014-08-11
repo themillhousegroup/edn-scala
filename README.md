@@ -25,17 +25,22 @@ you can read such a file into your Scala code as a
 
 
 ## Credits
-  - Obviously, the [edn-java](https://github.com/bpsm/edn-java) library is the thing doing the heavy-lifting here.
+Obviously, the [edn-java](https://github.com/bpsm/edn-java) library is the thing doing the heavy-lifting here.
 
 
 ## Getting Started
-  - Bring in the library by adding the release repository and the dependency to your ```build.sbt```:
+Bring in the library by adding the following to your ```build.sbt```. 
+
+  - The release repository: 
 
 ```
    resolvers ++= Seq(
      "millhouse-releases" at "http://repository-themillhousegroup.forge.cloudbees.com/release"
    )
+```
+  - The dependency itself: 
 
+```
    libraryDependencies ++= Seq(
      "com.themillhousegroup" %% "edn-scala" % "1.0"
    )
@@ -51,13 +56,13 @@ you really don't need to know much about it because if you ```import com.themill
 you get implicits defined to automatically get a ```Parseable``` from either a ```scala.io.Source``` or a simple
 ```String``` representing a filename.
 
-Once you have a ```Parseable```, there are three ways you can use this library; they will be presented in order of ease-of-use.
+Once you have a ```Parseable```, there are three ways you can use this library; they will be presented in order of (decreasing) ease-of-use.
 
 #### Treating the edn data as a ```Map[String, AnyRef]```
 You've already seen an example of this usage pattern above.
 Get an ```EDNParser``` instance by calling ```EDNParser()``` and then pass the ```Parseable``` to ```asMap()```.
 
-This is by far the most straightforward way to start woking with EDN data from Scala, because once you've got a ```Map```, you can
+This is by far the most straightforward way to start working with EDN data from Scala, because once you've got a ```Map```, you can
 do all the idiomatic Scala things with it.
 
 Remember that any maps _within_ the top-level map will also be of type ```Map[String, AnyRef]```.
@@ -75,5 +80,5 @@ This is the "thinnest" wrapper around the Java API; it just gives you an ```Opti
 the EDN data. You'll get a ```None``` if we've got to the end of the data, and a ```ClassCastException``` if the type coercion
 didn't work.
 
-Unless you've found a bug in the ```asMap``` or ```asStream``` functions (in which case, raise an issue!), there is very little reason why you would want to
+Unless you've found a bug in the ```asMap``` or ```asStream``` functions (in which case, raise an [issue](https://github.com/themillhousegroup/edn-scala/issues)!), there is very little reason why you would want to
 resort to using this access mode.

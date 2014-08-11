@@ -27,8 +27,6 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
 
       m must havePairs("x" -> 1, "y" -> 2)
 
-      println(m("z").getClass)
-
       val nested = m("z").asInstanceOf[Map[String, AnyRef]]
       nested must haveSize(2)
 
@@ -44,8 +42,6 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
 
       m must havePairs("x" -> 1, "y" -> 2)
 
-      println(m("z").getClass)
-
       val list = m("z").asInstanceOf[Seq[Int]]
       list must haveSize(4)
 
@@ -60,8 +56,6 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
       m must haveSize(3)
 
       m must havePairs("x" -> 1, "y" -> 2)
-
-      println(m("z").getClass)
 
       val list = m("z").asInstanceOf[Seq[Int]]
       list must haveSize(4)
