@@ -4,7 +4,7 @@ organization := "com.themillhousegroup"
 
 version := "1.0"
 
-scalaVersion := "2.10.2"
+crossScalaVersions := Seq("2.10.2", "2.11.2")
 
 libraryDependencies ++= Seq (
   "us.bpsm"               %   "edn-java"              % "0.4.4",
