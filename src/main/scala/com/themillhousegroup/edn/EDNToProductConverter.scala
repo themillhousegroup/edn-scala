@@ -1,5 +1,9 @@
 package com.themillhousegroup.edn
 
-class EDNToProductConverter {
+object EDNToProductConverter {
 
+
+  def apply[T <: Product](map: Map[String, AnyRef], targetClass: Class[T]):T = {
+    ???
+  }
 }

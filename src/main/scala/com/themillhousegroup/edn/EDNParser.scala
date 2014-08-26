@@ -34,6 +34,7 @@ class ScalaEDNParser(config:Config) {
 
   /** A simple wrapper around the basic Java interface,
     * this method keeps returning Some(T) until all values are exhausted
+    * @since 1.0.0
     */
   def nextValue[T](pbr: Parseable):Option[T] = {
     val v = javaParser.nextValue(pbr)
@@ -99,6 +100,7 @@ class ScalaEDNParser(config:Config) {
     * within the parent stream.
     * If the entire EDN block is contained within {}, then
     * it will be treated as a Stream with one tuple, "" -> (the content)
+    * @since 1.0.0
     */
   def asStream(pbr: Parseable):Stream[(String, AnyRef)] = {
      processParseable(pbr)(streamCollection).toStream
@@ -115,6 +117,7 @@ class ScalaEDNParser(config:Config) {
     * so for example:
     * { :x 1 :y 2 :z 3 } will result in a Map of size 3, rather
     * than a Map with one entry of "" -> (Map of size 3)
+    * @since 1.0.0
     */
   def asMap(pbr: Parseable):Map[String, AnyRef] = {
     val m = immutableMap(processParseable(pbr)(convertCollection).toTraversable)
@@ -124,5 +127,22 @@ class ScalaEDNParser(config:Config) {
       s.isEmpty && a.isInstanceOf[Map[String, AnyRef]]} )) {
       m.head._2.asInstanceOf[Map[String, AnyRef]]
     } else m
+  }
+
+  /**
+   * Reduces the amount of casting required when treating EDN files
+   * as a Map[String, AnyRef]. This function will attempt to coerce
+   * the contents of the provided Parseable into an instance of the
+   * given case class (all case classes extend Product, hence the signature).
+   *
+   * Fields in the EDN not found in the target class will be ignored.
+   * Fields in the target class MUST be present in the EDN, unless they
+   * are Option types, in which case they will be set to None.
+   *
+   * @since 1.1.0
+   */
+  def readInto[T <: Product](pbr: Parseable, targetClass:Class[T]):T = {
+    val map = asMap(pbr)
+    EDNToProductConverter(map, targetClass)
   }
 }

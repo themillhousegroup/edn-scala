@@ -2,7 +2,7 @@ name := "edn-scala"
 
 organization := "com.themillhousegroup"
 
-version := "1.0"
+version := "1.1.0"
 
 crossScalaVersions := Seq("2.10.2", "2.11.2")
 
