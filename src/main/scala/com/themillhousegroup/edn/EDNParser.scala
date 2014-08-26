@@ -129,6 +129,8 @@ class ScalaEDNParser(config:Config) {
     } else m
   }
 
+
+  import scala.reflect.runtime.universe._
   /**
    * Reduces the amount of casting required when treating EDN files
    * as a Map[String, AnyRef]. This function will attempt to coerce
@@ -141,8 +143,8 @@ class ScalaEDNParser(config:Config) {
    *
    * @since 1.1.0
    */
-  def readInto[T <: Product](pbr: Parseable, targetClass:Class[T]):T = {
+  def readInto[T: TypeTag: ClassTag](pbr: Parseable):T = {
     val map = asMap(pbr)
-    EDNToProductConverter(map, targetClass)
+    EDNToProductConverter[T](map)
   }
 }
