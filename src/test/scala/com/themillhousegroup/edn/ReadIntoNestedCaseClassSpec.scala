@@ -5,16 +5,15 @@ import com.themillhousegroup.edn.test.EDNParsing
 import scala.util.Try
 import com.themillhousegroup.edn.test.CaseClassFixtures._
 
-
 class ReadIntoNestedCaseClassSpec extends Specification with EDNParsing {
 
-  class CaseClassScope[T <: Product](s:String, targetClass:Class[T]) extends ParserScope(s) {
+  class CaseClassScope[T <: Product](s: String, targetClass: Class[T]) extends ParserScope(s) {
 
-    lazy val readInto:Try[T] = p.readInto(values, targetClass)
-    lazy val readResult:T = readInto.get
+    lazy val readInto: Try[T] = p.readInto(values, targetClass)
+    lazy val readResult: T = readInto.get
   }
 
-  case class CannotCreate(x:Int, y:String)
+  case class CannotCreate(x: Int, y: String)
 
   "Reading EDN into case classes - nested structures -" should {
 

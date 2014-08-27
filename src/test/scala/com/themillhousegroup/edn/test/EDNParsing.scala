@@ -6,13 +6,13 @@ import com.themillhousegroup.edn.EDNParser
 
 trait EDNParsing {
 
-  def parse(s:String) = Parsers.newParseable(s)
+  def parse(s: String) = Parsers.newParseable(s)
 
-//  object ParserScope {
-//    def apply(parseableSource:String) = new ParserScope(parseableSource)
-//  }
+  //  object ParserScope {
+  //    def apply(parseableSource:String) = new ParserScope(parseableSource)
+  //  }
 
-  class ParserScope(s:String) extends Scope {
+  class ParserScope(s: String) extends Scope {
     val p = EDNParser()
     val values = parse(s)
   }

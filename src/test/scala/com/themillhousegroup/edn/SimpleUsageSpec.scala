@@ -7,7 +7,6 @@ import us.bpsm.edn.Keyword._
 import us.bpsm.edn.Keyword
 import com.themillhousegroup.edn.test.EDNParsing
 
-
 class SimpleUsageSpec extends Specification with EDNParsing {
 
   val pbr = parse("{:x 1, :y 2}")

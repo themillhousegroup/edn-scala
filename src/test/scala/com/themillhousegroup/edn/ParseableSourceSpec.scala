@@ -1,11 +1,10 @@
 package com.themillhousegroup.edn
 
 import org.specs2.mutable.Specification
-import com.themillhousegroup.edn.test.{StreamChecking, EDNParsing}
+import com.themillhousegroup.edn.test.{ StreamChecking, EDNParsing }
 import java.io.FileNotFoundException
 
 class ParseableSourceSpec extends Specification with EDNParsing with StreamChecking {
-
 
   "The ParseableSource object" should {
 
@@ -14,7 +13,7 @@ class ParseableSourceSpec extends Specification with EDNParsing with StreamCheck
       val p = EDNParser()
 
       val src = scala.io.Source.fromURL(
-          getClass.getResource("/config.edn"))
+        getClass.getResource("/config.edn"))
 
       import com.themillhousegroup.edn.ParseableSource._
 
@@ -24,7 +23,7 @@ class ParseableSourceSpec extends Specification with EDNParsing with StreamCheck
 
       s must haveSize(1)
 
-      val innerStream = s.head._2.asInstanceOf[Stream[(String,AnyRef)]]
+      val innerStream = s.head._2.asInstanceOf[Stream[(String, AnyRef)]]
 
       keyStreamMustHave(
         innerStream,
@@ -51,8 +50,7 @@ class ParseableSourceSpec extends Specification with EDNParsing with StreamCheck
 
       s must haveSize(1)
 
-      val innerStream = s.head._2.asInstanceOf[Stream[(String,AnyRef)]]
-
+      val innerStream = s.head._2.asInstanceOf[Stream[(String, AnyRef)]]
 
       keyStreamMustHave(
         innerStream,

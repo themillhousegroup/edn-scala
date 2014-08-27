@@ -6,11 +6,11 @@ import us.bpsm.edn.parser.Parseable
 import java.io.FileNotFoundException
 
 object ParseableSource {
-  implicit def source2Parseable(s:Source):Parseable = {
+  implicit def source2Parseable(s: Source): Parseable = {
     new ParseableSource(s)
   }
 
-  implicit def filename2Parseable(filename:String) = {
+  implicit def filename2Parseable(filename: String) = {
     val url = getClass.getResource(filename)
 
     if (url == null) throw new FileNotFoundException(filename)
@@ -21,23 +21,22 @@ object ParseableSource {
   }
 }
 /** An adapter to allow a Scala Source to be a Parseable */
-class ParseableSource(src:Source) extends Parseable {
+class ParseableSource(src: Source) extends Parseable {
 
-  var unreadBuffer:Option[Int] = None
+  var unreadBuffer: Option[Int] = None
 
   def read(): Int = {
 
-      unreadBuffer.fold {
-        if (src.hasNext) {
-          src.next().toInt
-        } else {
-          Parseable.END_OF_INPUT
-        }
+    unreadBuffer.fold {
+      if (src.hasNext) {
+        src.next().toInt
+      } else {
+        Parseable.END_OF_INPUT
       }
-      { unread =>
-        unreadBuffer = None
-        unread
-      }
+    } { unread =>
+      unreadBuffer = None
+      unread
+    }
   }
 
   def close = src.close

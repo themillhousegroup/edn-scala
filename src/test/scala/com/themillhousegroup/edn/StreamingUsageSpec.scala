@@ -1,7 +1,7 @@
 package com.themillhousegroup.edn
 
 import org.specs2.mutable.Specification
-import com.themillhousegroup.edn.test.{StreamChecking, EDNParsing}
+import com.themillhousegroup.edn.test.{ StreamChecking, EDNParsing }
 
 class StreamingUsageSpec extends Specification with EDNParsing with StreamChecking {
 
@@ -12,7 +12,7 @@ class StreamingUsageSpec extends Specification with EDNParsing with StreamChecki
 
       val s = p.asStream(values)
 
-      keyValueStreamMustHave(s, "a" -> 1, "b" -> "foo" , "c?" -> true)
+      keyValueStreamMustHave(s, "a" -> 1, "b" -> "foo", "c?" -> true)
     }
 
     "Allow iteration over a flat keyspace with a map within" in new ParserScope(
@@ -99,8 +99,10 @@ class StreamingUsageSpec extends Specification with EDNParsing with StreamChecki
       val nestedStream = s(3)._2.asInstanceOf[Stream[(String, AnyRef)]]
 
       keyStreamMustHave(nestedStream, "da", "db", "dc")
-      val mostNestedStream = nestedStream.find { case (k, v) =>
-        "dc" == (k) }.get._2.asInstanceOf[Stream[(String, AnyRef)]]
+      val mostNestedStream = nestedStream.find {
+        case (k, v) =>
+          "dc" == (k)
+      }.get._2.asInstanceOf[Stream[(String, AnyRef)]]
 
       keyValueStreamMustHave(mostNestedStream,
         "dc1" -> "inner",
@@ -116,7 +118,7 @@ class StreamingUsageSpec extends Specification with EDNParsing with StreamChecki
       s must haveSize(1)
       s.head._1 must beEqualTo("")
       val nestedStream = s.head._2.asInstanceOf[Stream[(String, AnyRef)]]
-      keyValueStreamMustHave(nestedStream, "a" -> 1, "b" -> "foo" , "c?" -> true)
+      keyValueStreamMustHave(nestedStream, "a" -> 1, "b" -> "foo", "c?" -> true)
     }
   }
 

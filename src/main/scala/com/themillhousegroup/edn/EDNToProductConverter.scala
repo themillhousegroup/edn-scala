@@ -1,14 +1,12 @@
 package com.themillhousegroup.edn
 
-
 object EDNToProductConverter {
 
-
-  def apply[T <: Product](map: Map[String, AnyRef], targetClass:Class[T]):T = {
+  def apply[T <: Product](map: Map[String, AnyRef], targetClass: Class[T]): T = {
     buildCaseClass(map, targetClass)
   }
 
-  private[this] def buildCaseClass[T](map: Map[String, AnyRef], targetClass:Class[T]):T = {
+  private[this] def buildCaseClass[T](map: Map[String, AnyRef], targetClass: Class[T]): T = {
     rejectIfScoped(targetClass)
     val args = targetClass.getDeclaredFields.map { field =>
       val fieldName = field.getName
@@ -20,33 +18,33 @@ object EDNToProductConverter {
         matchRequiredField(fieldName, fieldType, map.get(fieldName))
       }
     }
-    targetClass.getConstructors.head.newInstance(args.asInstanceOf[Array[Object]]:_*).asInstanceOf[T]
+    targetClass.getConstructors.head.newInstance(args.asInstanceOf[Array[Object]]: _*).asInstanceOf[T]
   }
 
-  private[this] def rejectIfScoped(targetClass:Class[_]) = {
+  private[this] def rejectIfScoped(targetClass: Class[_]) = {
     if (targetClass.getDeclaredFields.exists(_.isSynthetic)) {
       throw new UnsupportedOperationException(
         s"Can't create an instance of ${targetClass.getName} - it's in the wrong scope")
     }
   }
 
-  private[this] def isProduct(fieldType:Class[_]) = {
+  private[this] def isProduct(fieldType: Class[_]) = {
     fieldType.getInterfaces.exists(classOf[Product] == _)
   }
 
-  private[this] def isOption(fieldType:Class[_]) = {
+  private[this] def isOption(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[Option[_]])
   }
 
-  private[this] def isInt(fieldType:Class[_]) = {
+  private[this] def isInt(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[Int])
   }
 
-  private[this] def isJLong(fieldType:Class[_]) = {
+  private[this] def isJLong(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[java.lang.Long])
   }
 
-  private def matchOptionalField[F](fieldName:String, fieldType: Class[F], mapValue: Option[AnyRef]):Option[F] = {
+  private def matchOptionalField[F](fieldName: String, fieldType: Class[F], mapValue: Option[AnyRef]): Option[F] = {
     mapValue.fold {
       None.asInstanceOf[Option[F]]
     } { v =>
@@ -63,7 +61,7 @@ object EDNToProductConverter {
     }
   }
 
-  private def matchRequiredField[F](fieldName:String, fieldType: Class[F], mapValue: Option[AnyRef]):F = {
+  private def matchRequiredField[F](fieldName: String, fieldType: Class[F], mapValue: Option[AnyRef]): F = {
     mapValue.fold[F] {
       // EDN does NOT contain a field with this keyword
       throw new IllegalArgumentException(s"Non-optional field '${fieldName}' was not found in the given EDN.")

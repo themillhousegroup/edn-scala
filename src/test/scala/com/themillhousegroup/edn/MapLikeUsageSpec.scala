@@ -5,11 +5,10 @@ import com.themillhousegroup.edn.test.EDNParsing
 
 class MapLikeUsageSpec extends Specification with EDNParsing {
 
-
   "Treating the EDN file like a Map" should {
 
     "Allow clients to select individual keys from a simple flat structure" in new ParserScope(
-      """  :x 1, :y 2  """ ) {
+      """  :x 1, :y 2  """) {
 
       val m = p.asMap(values)
 
@@ -19,7 +18,7 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
     }
 
     "Allow clients to select nested keys from a simple flat structure" in new ParserScope(
-      """  :x 1, :y 2  :z { :za true :zb "enabled" } """  ) {
+      """  :x 1, :y 2  :z { :za true :zb "enabled" } """) {
 
       val m = p.asMap(values)
 
@@ -34,7 +33,7 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
     }
 
     "Allow clients to select lists from a simple flat structure" in new ParserScope(
-      """  :x 1, :y 2  :z [ 2 4 6 8 ] """  ) {
+      """  :x 1, :y 2  :z [ 2 4 6 8 ] """) {
 
       val m = p.asMap(values)
 
@@ -49,7 +48,7 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
     }
 
     "Handle simple strings rather than keywords" in new ParserScope(
-      """  :x 1, "y" 2  :z [ 2 4 6 8 ] """  ) {
+      """  :x 1, "y" 2  :z [ 2 4 6 8 ] """) {
 
       val m = p.asMap(values)
 
@@ -63,23 +62,22 @@ class MapLikeUsageSpec extends Specification with EDNParsing {
       list must containTheSameElementsAs(Seq(2, 4, 6, 8))
     }
 
-    "Consider an anonymously-labelled root map to be the top-level" in new ParserScope (
+    "Consider an anonymously-labelled root map to be the top-level" in new ParserScope(
       """ { :x 1,
             :y 2
             :z { :foo 11 :bar 12 :baz 13}
-          } """ ) {
-
+          } """) {
 
       val m = p.asMap(values)
       m must haveSize(3)
 
-      m must haveKeys("x","y", "z")
+      m must haveKeys("x", "y", "z")
 
       m("z") must beAnInstanceOf[Map[String, AnyRef]]
 
       val zMap = m("z").asInstanceOf[Map[String, AnyRef]]
       zMap must haveKeys("foo", "bar", "baz")
     }
- }
+  }
 
 }

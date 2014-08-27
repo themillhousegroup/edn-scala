@@ -6,19 +6,19 @@ trait StreamChecking {
 
   this: Specification =>
 
-  def valueStreamMustHave[T](stream:Stream[T], items:T*) = {
+  def valueStreamMustHave[T](stream: Stream[T], items: T*) = {
     val s = stream.toSeq
     s must haveSize(items.size)
     s must containTheSameElementsAs(items)
   }
 
-  def keyStreamMustHave(stream:Stream[(String, AnyRef)], items:String*) = {
+  def keyStreamMustHave(stream: Stream[(String, AnyRef)], items: String*) = {
     val s = stream.toSeq
     s must haveSize(items.size)
     s.map { case (k, v) => k } must containTheSameElementsAs(items)
   }
 
-  def keyValueStreamMustHave(stream:Stream[(String, AnyRef)], items:(String, _)*) = {
+  def keyValueStreamMustHave(stream: Stream[(String, AnyRef)], items: (String, _)*) = {
     val s = stream.toSeq
     s must haveSize(items.size)
     s must containTheSameElementsAs(items)
