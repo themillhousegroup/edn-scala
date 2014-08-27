@@ -3,12 +3,7 @@ package com.themillhousegroup.edn
 import org.specs2.mutable.Specification
 import com.themillhousegroup.edn.test.EDNParsing
 import scala.util.Try
-
-case class AllStrings(bish:String, bash:String, bosh:String)
-case class OptionalStrings(bish:String, bash:Option[String], bosh:String)
-case class AllLongs(bash:Option[Long], bosh:Long)
-case class IntsNotLongs(bash:Option[Int], bosh:Int)
-case class MixedBunch(bish:String, bash:Option[Int], bosh:Int)
+import com.themillhousegroup.edn.test.CaseClassFixtures._
 
 
 class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {

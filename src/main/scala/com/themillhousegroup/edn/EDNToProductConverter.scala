@@ -1,30 +1,30 @@
 package com.themillhousegroup.edn
 
-import scala.reflect._
-import scala.reflect.api._
-import scala.reflect.runtime.universe._
 
 object EDNToProductConverter {
 
 
-  def apply[T <: Product](map: Map[String, AnyRef],  targetClass:Class[T]):T = {
-
-    val dfs = targetClass.getDeclaredFields
-    //println(s"DFs: ${dfs.mkString}")
-
+  def apply[T <: Product](map: Map[String, AnyRef], targetClass:Class[T]):T = {
+    rejectIfScoped(targetClass)
     val args = targetClass.getDeclaredFields.map { field =>
       val fieldName = field.getName
       val fieldType = field.getType
 
+      println(s"$fieldName: $fieldType, ${field.isSynthetic}")
       if (isOption(fieldType)) {
         matchOptionalField(fieldName, fieldType, map.get(fieldName))
       } else {
         matchRequiredField(fieldName, fieldType, map.get(fieldName))
       }
     }
-
-    println(s"args: ${args.mkString}")
     targetClass.getConstructors.head.newInstance(args.asInstanceOf[Array[Object]]:_*).asInstanceOf[T]
+  }
+
+  private[this] def rejectIfScoped(targetClass:Class[_]) = {
+    if (targetClass.getDeclaredFields.exists(_.isSynthetic)) {
+      throw new UnsupportedOperationException(
+        s"Can't create an instance of ${targetClass.getName} - it's in the wrong scope")
+    }
   }
 
   private[this] def isOption(fieldType:Class[_]) = {
