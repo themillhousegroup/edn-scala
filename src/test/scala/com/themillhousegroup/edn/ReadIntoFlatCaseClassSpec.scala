@@ -6,8 +6,12 @@ import scala.util.Try
 
 case class AllStrings(bish:String, bash:String, bosh:String)
 case class OptionalStrings(bish:String, bash:Option[String], bosh:String)
+case class AllLongs(bash:Option[Long], bosh:Long)
+case class IntsNotLongs(bash:Option[Int], bosh:Int)
+case class MixedBunch(bish:String, bash:Option[Int], bosh:Int)
 
-class ReadIntoCaseClassSpec extends Specification with EDNParsing {
+
+class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
   class CaseClassScope[T <: Product](s:String, targetClass:Class[T]) extends ParserScope(s) {
 
@@ -16,7 +20,7 @@ class ReadIntoCaseClassSpec extends Specification with EDNParsing {
   }
 
 
-  "Reading EDN into case classes" should {
+  "Reading EDN into case classes - flat structures -" should {
 
     "Support single-level mapping of simple strings" in new CaseClassScope(
       """ :bish "foo" :bash "bar" :bosh "baz" """, classOf[AllStrings]) {
@@ -31,7 +35,7 @@ class ReadIntoCaseClassSpec extends Specification with EDNParsing {
     "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
       """ :bish "foo" :bash "bar"  """, classOf[AllStrings]) {
 
-      println(s" REadinto: $readInto") // must beAFailedTry[AllStrings]
+      readInto must beAFailedTry[AllStrings]
     }
 
     "Support single-level mapping of optional strings - present" in new CaseClassScope(
@@ -52,6 +56,35 @@ class ReadIntoCaseClassSpec extends Specification with EDNParsing {
       readResult.bish must beEqualTo("foo")
       readResult.bash must beNone
       readResult.bosh must beEqualTo("baz")
+    }
+
+
+    "Support automatic mapping of Longs to Ints" in new CaseClassScope(
+      """ :bash 6 :bosh 9 """, classOf[IntsNotLongs]) {
+
+      readResult must not beNull
+
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
+    }
+
+    "Support Longs in case classes" in new CaseClassScope(
+      """ :bash 6 :bosh 9 """, classOf[AllLongs]) {
+
+      readResult must not beNull
+
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
+    }
+
+    "Support single-level mapping of mixed types" in new CaseClassScope(
+      """ :bish "foo" :bash 6 :bosh 9 """, classOf[MixedBunch]) {
+
+      readResult must not beNull
+
+      readResult.bish must beEqualTo("foo")
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
     }
   }
 }
