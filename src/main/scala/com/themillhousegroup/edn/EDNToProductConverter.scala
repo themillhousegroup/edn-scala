@@ -10,7 +10,6 @@ object EDNToProductConverter {
       val fieldName = field.getName
       val fieldType = field.getType
 
-      println(s"$fieldName: $fieldType, ${field.isSynthetic}")
       if (isOption(fieldType)) {
         matchOptionalField(fieldName, fieldType, map.get(fieldName))
       } else {

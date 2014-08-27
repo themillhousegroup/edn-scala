@@ -14,8 +14,15 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
     lazy val readResult:T = readInto.get
   }
 
+  case class CannotCreate(x:Int, y:String)
 
   "Reading EDN into case classes - flat structures -" should {
+
+    "Reject a case class that won't be instantiable" in new CaseClassScope(
+      """ :x "foo" :y "bar" """, classOf[CannotCreate]) {
+
+      readInto must beAFailedTry[CannotCreate].withThrowable[UnsupportedOperationException]
+    }
 
     "Support single-level mapping of simple strings" in new CaseClassScope(
       """ :bish "foo" :bash "bar" :bosh "baz" """, classOf[AllStrings]) {
@@ -30,7 +37,7 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
     "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
       """ :bish "foo" :bash "bar"  """, classOf[AllStrings]) {
 
-      readInto must beAFailedTry[AllStrings]
+      readInto must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
     }
 
     "Support single-level mapping of optional strings - present" in new CaseClassScope(
