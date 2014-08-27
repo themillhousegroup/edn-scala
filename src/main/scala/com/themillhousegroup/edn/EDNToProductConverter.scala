@@ -5,6 +5,10 @@ object EDNToProductConverter {
 
 
   def apply[T <: Product](map: Map[String, AnyRef], targetClass:Class[T]):T = {
+    buildCaseClass(map, targetClass)
+  }
+
+  private[this] def buildCaseClass[T](map: Map[String, AnyRef], targetClass:Class[T]):T = {
     rejectIfScoped(targetClass)
     val args = targetClass.getDeclaredFields.map { field =>
       val fieldName = field.getName
@@ -26,6 +30,10 @@ object EDNToProductConverter {
     }
   }
 
+  private[this] def isProduct(fieldType:Class[_]) = {
+    fieldType.getInterfaces.exists(classOf[Product] == _)
+  }
+
   private[this] def isOption(fieldType:Class[_]) = {
     fieldType.isAssignableFrom(classOf[Option[_]])
   }
@@ -43,7 +51,15 @@ object EDNToProductConverter {
       None.asInstanceOf[Option[F]]
     } { v =>
       // The case class declared it optional, so we'll populate a Some[T]
-      Some(v.asInstanceOf[F])
+      if (isProduct(fieldType)) {
+        println(
+          s"Optional product: $fieldName $fieldType")
+
+        // TODO: This is NOT WORKING as the type of the Option is being erased
+        Some(buildCaseClass(v.asInstanceOf[Map[String, AnyRef]], fieldType))
+      } else {
+        Some(v.asInstanceOf[F])
+      }
     }
   }
 
@@ -52,12 +68,16 @@ object EDNToProductConverter {
       // EDN does NOT contain a field with this keyword
       throw new IllegalArgumentException(s"Non-optional field '${fieldName}' was not found in the given EDN.")
     } { v =>
-      // EDN-Java tends to favour java.lang.Long where a case class would use an Int;
-      // make the conversion transparent:
-      if (isInt(fieldType) && isJLong(v.getClass)) {
-        v.asInstanceOf[Long].toInt.asInstanceOf[F]
+      if (isProduct(fieldType)) {
+        buildCaseClass(v.asInstanceOf[Map[String, AnyRef]], fieldType)
       } else {
-        v.asInstanceOf[F]
+        // EDN-Java tends to favour java.lang.Long where a case class would use an Int;
+        // make the conversion transparent:
+        if (isInt(fieldType) && isJLong(v.getClass)) {
+          v.asInstanceOf[Long].toInt.asInstanceOf[F]
+        } else {
+          v.asInstanceOf[F]
+        }
       }
     }
   }

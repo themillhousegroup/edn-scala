@@ -16,77 +16,54 @@ class ReadIntoNestedCaseClassSpec extends Specification with EDNParsing {
 
   case class CannotCreate(x:Int, y:String)
 
-  "Reading EDN into case classes - flat structures -" should {
+  "Reading EDN into case classes - nested structures -" should {
 
-    "Reject a case class that won't be instantiable" in new CaseClassScope(
-      """ :x "foo" :y "bar" """, classOf[CannotCreate]) {
-
-      readInto must beAFailedTry[CannotCreate].withThrowable[UnsupportedOperationException]
-    }
-
-    "Support single-level mapping of simple strings" in new CaseClassScope(
-      """ :bish "foo" :bash "bar" :bosh "baz" """, classOf[AllStrings]) {
+    "Support nested mapping of case classes" in new CaseClassScope(
+      """ :contents { :bish "foo" :bash "bar" :bosh "baz" } """, classOf[NestedJustOnce]) {
 
       readResult must not beNull
 
-      readResult.bish must beEqualTo("foo")
-      readResult.bash must beEqualTo("bar")
-      readResult.bosh must beEqualTo("baz")
+      readResult.contents must not beNull
+
+      readResult.contents.bish must beEqualTo("foo")
+      readResult.contents.bash must beEqualTo("bar")
+      readResult.contents.bosh must beEqualTo("baz")
     }
 
-    "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
-      """ :bish "foo" :bash "bar"  """, classOf[AllStrings]) {
-
-      readInto must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
-    }
-
-    "Support single-level mapping of optional strings - present" in new CaseClassScope(
-      """ :bish "foo" :bash "bar" :bosh "baz" """, classOf[OptionalStrings]) {
+    "Support nested mapping of case classes together with simple fields" in new CaseClassScope(
+      """ :contents { :bish "foo" :bash "bar" :bosh "baz" } :a 1 :b 2""", classOf[NestedWithFields]) {
 
       readResult must not beNull
 
-      readResult.bish must beEqualTo("foo")
-      readResult.bash must beSome("bar")
-      readResult.bosh must beEqualTo("baz")
+      readResult.contents must not beNull
+
+      readResult.contents.bish must beEqualTo("foo")
+      readResult.contents.bash must beEqualTo("bar")
+      readResult.contents.bosh must beEqualTo("baz")
+      readResult.a must beEqualTo(1)
+      readResult.b must beEqualTo(2)
     }
 
-    "Support single-level mapping of optional strings - absent" in new CaseClassScope(
-      """ :bish "foo" :bosh "baz" """, classOf[OptionalStrings]) {
+    "Support nested optional case classes - positive case" in new CaseClassScope(
+      """ :contents { :bish "foo" :bash "bar" :bosh "baz" } """, classOf[NestedOptionally]) {
 
       readResult must not beNull
 
-      readResult.bish must beEqualTo("foo")
-      readResult.bash must beNone
-      readResult.bosh must beEqualTo("baz")
+      readResult.contents must beSome[AllStrings]
+
+      val c = readResult.contents.get
+
+      c must beEqualTo("foo")
+      readResult.contents.get.bash must beEqualTo("bar")
+      readResult.contents.get.bosh must beEqualTo("baz")
     }
 
-
-    "Support automatic mapping of Longs to Ints" in new CaseClassScope(
-      """ :bash 6 :bosh 9 """, classOf[IntsNotLongs]) {
+    "Support nested optional case classes - negative case" in new CaseClassScope(
+      """  """, classOf[NestedOptionally]) {
 
       readResult must not beNull
 
-      readResult.bash must beSome(6)
-      readResult.bosh must beEqualTo(9)
-    }
-
-    "Support Longs in case classes" in new CaseClassScope(
-      """ :bash 6 :bosh 9 """, classOf[AllLongs]) {
-
-      readResult must not beNull
-
-      readResult.bash must beSome(6)
-      readResult.bosh must beEqualTo(9)
-    }
-
-    "Support single-level mapping of mixed types" in new CaseClassScope(
-      """ :bish "foo" :bash 6 :bosh 9 """, classOf[MixedBunch]) {
-
-      readResult must not beNull
-
-      readResult.bish must beEqualTo("foo")
-      readResult.bash must beSome(6)
-      readResult.bosh must beEqualTo(9)
+      readResult.contents must beNone
     }
   }
 }

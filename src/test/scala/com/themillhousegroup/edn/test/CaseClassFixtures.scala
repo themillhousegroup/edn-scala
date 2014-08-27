@@ -6,4 +6,11 @@ object CaseClassFixtures {
   case class AllLongs(bash:Option[Long], bosh:Long)
   case class IntsNotLongs(bash:Option[Int], bosh:Int)
   case class MixedBunch(bish:String, bash:Option[Int], bosh:Int)
+
+  case class NestedJustOnce(contents:AllStrings)
+  case class NestedWithFields(contents:AllStrings, a:Int, b:Int)
+  case class NestedOptionally(contents:Option[AllStrings])
+
+  case class StringsAllTheWayDown(first:AllStrings, second:AllStrings)
+
 }
