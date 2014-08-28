@@ -9,7 +9,7 @@ class ReadIntoNestedCaseClassSpec extends Specification with EDNParsing {
 
   class CaseClassScope[T <: Product](s: String, targetClass: Class[T]) extends ParserScope(s) {
 
-    lazy val readInto: Try[T] = p.readInto(values, targetClass)
+    lazy val readInto: Try[T] = p.readInto(values)
     lazy val readResult: T = readInto.get
   }
 

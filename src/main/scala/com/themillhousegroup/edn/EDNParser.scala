@@ -5,8 +5,7 @@ import us.bpsm.edn.parser.Parsers._
 import us.bpsm.edn.Keyword._
 import us.bpsm.edn.parser.Parser.Config
 import us.bpsm.edn.Keyword
-import scala.collection.IterableLike
-import scala.util.Try
+import scala.reflect.ClassTag
 
 object EDNParser {
 
@@ -137,6 +136,8 @@ class ScalaEDNParser(config: Config) {
     } else m
   }
 
+  import scala.reflect.runtime.universe._
+  import scala.reflect._
   /**
    * Reduces the amount of casting required when treating EDN files
    * as a Map[String, AnyRef]. This function will attempt to coerce
@@ -149,6 +150,9 @@ class ScalaEDNParser(config: Config) {
    *
    * @since 1.1.0
    */
-  def readInto[T <: Product](pbr: Parseable, targetClass: Class[T]): Try[T] =
-    Try(EDNToProductConverter(asMap(pbr), targetClass))
+  def readInto[T <: Product: TypeTag](pbr: Parseable): scala.util.Try[T] = {
+    println(s"readInto: ${typeOf[T]}")
+
+    scala.util.Try(EDNToProductConverter(asMap(pbr)))
+  }
 }
