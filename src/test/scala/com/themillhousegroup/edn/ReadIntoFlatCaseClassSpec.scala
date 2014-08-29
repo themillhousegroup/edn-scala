@@ -5,22 +5,26 @@ import com.themillhousegroup.edn.test.EDNParsing
 import scala.util.Try
 import com.themillhousegroup.edn.test.CaseClassFixtures._
 import scala.reflect.runtime.universe._
+import scala.Product
 
 class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
-  class CaseClassScope[T <: Product: TypeTag](s: String) extends ParserScope(s) {
+  class CaseClassScope(s: String) extends ParserScope(s) {
 
-    println(s"CCS: ${typeOf[T]}")
-    lazy val readInto: Try[T] = p.readInto(values)
+    def readInto[T <: Product: TypeTag]: Try[T] = {
+      println(s"CCS: ${typeOf[T]}")
+      p.readInto(values)
+    }
 
-    lazy val readResult: T = readInto.get
+    def readIntoResult[T <: Product: TypeTag]: T = {
+      readInto[T].get
+    }
+
   }
 
   case class CannotCreate(x: Int, y: String)
 
   "Reading EDN into case classes - flat structures -" should {
-
-    class AllStringsScope(s: String) extends CaseClassScope[AllStrings](s) {}
 
     //    "Reject a case class that won't be instantiable" in new CaseClassScope(
     //      """ :x "foo" :y "bar" """, classOf[CannotCreate]) {
@@ -28,39 +32,41 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
     //      readInto must beAFailedTry[CannotCreate].withThrowable[UnsupportedOperationException]
     //    }
     //
-    "Support single-level mapping of simple strings" in new AllStringsScope(
+    "Support single-level mapping of simple strings" in new CaseClassScope(
       """ :bish "foo" :bash "bar" :bosh "baz" """) {
 
+      val readResult = readIntoResult[AllStrings]
       readResult must not beNull
 
       readResult.bish must beEqualTo("foo")
       readResult.bash must beEqualTo("bar")
       readResult.bosh must beEqualTo("baz")
     }
-
-    "Return a failed Try: IllegalArgumentException if a field is missing" in new AllStringsScope(
-      """ :bish "foo" :bash "bar"  """) {
-
-      readInto must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
-    }
+    //
+    //    "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
+    //      """ :bish "foo" :bash "bar"  """) {
+    //
+    //      readInto[AllStrings] must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
+    //    }
   }
 
   "Reading EDN into case classes - flat structures with options -" should {
-    class OptionalStringsScope(s: String) extends CaseClassScope[OptionalStrings](s) {}
 
-    //    "Support single-level mapping of optional strings - present" in new CaseClassScope[OptionalStrings](
-    //      """ :bish "foo" :bash "bar" :bosh "baz" """) {
-    //
-    //      readResult must not beNull
-    //
-    //      readResult.bish must beEqualTo("foo")
-    //      readResult.bash must beSome("bar")
-    //      readResult.bosh must beEqualTo("baz")
-    //    }
+    "Support single-level mapping of optional strings - present" in new CaseClassScope(
+      """ :bish "foo" :bash "bar" :bosh "baz" """) {
 
-    "Support single-level mapping of optional strings - absent" in new OptionalStringsScope(
+      val readResult: OptionalStrings = readIntoResult[OptionalStrings]
+      readResult must not beNull
+
+      readResult.bish must beEqualTo("foo")
+      readResult.bash must beSome("bar")
+      readResult.bosh must beEqualTo("baz")
+    }
+
+    "Support single-level mapping of optional strings - absent" in new CaseClassScope(
       """ :bish "foo" :bosh "baz" """) {
 
+      val readResult: OptionalStrings = readIntoResult[OptionalStrings]
       readResult must not beNull
 
       readResult.bish must beEqualTo("foo")

@@ -4,7 +4,6 @@ import scala.reflect.runtime.universe._
 
 object EDNToProductConverter {
 
-  lazy val m = runtimeMirror(getClass.getClassLoader)
   lazy val optionType = typeOf[Option[_]].typeSymbol
 
   def apply[T <: Product: TypeTag](map: Map[String, AnyRef]): T = {
@@ -33,6 +32,7 @@ object EDNToProductConverter {
       }.asInstanceOf[Object]
     }.toArray
 
+    val m = runtimeMirror(getClass.getClassLoader)
     val c = m.runtimeClass(t.typeSymbol.asClass)
     c.getConstructors.head.newInstance(args: _*).asInstanceOf[T]
   }
