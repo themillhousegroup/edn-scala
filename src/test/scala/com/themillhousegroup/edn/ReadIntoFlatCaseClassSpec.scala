@@ -9,18 +9,6 @@ import scala.Product
 
 class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
-  class CaseClassScope(s: String) extends ParserScope(s) {
-
-    def readInto[T <: Product: TypeTag]: Try[T] = {
-      p.readInto(values)
-    }
-
-    def readIntoResult[T <: Product: TypeTag]: T = {
-      readInto[T].get
-    }
-
-  }
-
   case class CannotCreate(x: String, y: String)
 
   "Reading EDN into case classes - flat structures -" should {
@@ -39,6 +27,7 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
       readResult.bish must beEqualTo("foo")
       readResult.bash must beEqualTo("bar")
+
       readResult.bosh must beEqualTo("baz")
     }
 
