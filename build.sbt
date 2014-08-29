@@ -4,11 +4,13 @@ organization := "com.themillhousegroup"
 
 version := "1.1.0"
 
-crossScalaVersions := Seq("2.10.3", "2.11.2")
+scalaVersion := "2.11.2"
+
+crossScalaVersions := Seq("2.10.4", "2.11.2")
 
 libraryDependencies ++= Seq (
   "us.bpsm"               %   "edn-java"              % "0.4.4",
-  "org.scala-lang"        %   "scala-reflect"         % "2.10.3",
+  "org.scala-lang"        %   "scala-reflect"         % scalaVersion.value,
   "org.specs2"            %%  "specs2"                % "2.3.12" % "test",
   "org.mockito"           %   "mockito-all"           % "1.9.0" % "test"
 )

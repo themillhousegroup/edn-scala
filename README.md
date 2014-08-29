@@ -29,6 +29,8 @@ Obviously, the [edn-java](https://github.com/bpsm/edn-java) library is the thing
 
 
 ## Getting Started
+
+#### Including the dependency
 Bring in the library by adding the following to your ```build.sbt```. 
 
   - The release repository: 
@@ -46,6 +48,10 @@ Bring in the library by adding the following to your ```build.sbt```.
    )
 
 ```
+
+#### A note on Scala versions
+The library is cross-built for Scala 2.10.4 and 2.11.2, but 2.11.2 is _highly_ recommended if you intend to use the
+read-into-case-class functionality - `scala-reflect` seems to be much more reliable in Scala 2.11.
 
 ## Usage
 

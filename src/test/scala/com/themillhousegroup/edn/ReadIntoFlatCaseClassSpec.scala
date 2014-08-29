@@ -42,12 +42,12 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
       readResult.bash must beEqualTo("bar")
       readResult.bosh must beEqualTo("baz")
     }
-    //
-    //    "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
-    //      """ :bish "foo" :bash "bar"  """) {
-    //
-    //      readInto[AllStrings] must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
-    //    }
+
+    "Return a failed Try: IllegalArgumentException if a field is missing" in new CaseClassScope(
+      """ :bish "foo" :bash "bar"  """) {
+
+      readInto[AllStrings] must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
+    }
   }
 
   "Reading EDN into case classes - flat structures with options -" should {
@@ -74,32 +74,35 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
       readResult.bosh must beEqualTo("baz")
     }
 
-    //    "Support automatic mapping of Longs to Ints" in new CaseClassScope(
-    //      """ :bash 6 :bosh 9 """, classOf[IntsNotLongs]) {
-    //
-    //      readResult must not beNull
-    //
-    //      readResult.bash must beSome(6)
-    //      readResult.bosh must beEqualTo(9)
-    //    }
-    //
-    //    "Support Longs in case classes" in new CaseClassScope[AllLongs](
-    //      """ :bash 6 :bosh 9 """) {
-    //
-    //      readResult must not beNull
-    //
-    //      readResult.bash must beSome(6)
-    //      readResult.bosh must beEqualTo(9)
-    //    }
-    //
-    //    "Support single-level mapping of mixed types" in new CaseClassScope(
-    //      """ :bish "foo" :bash 6 :bosh 9 """, classOf[MixedBunch]) {
-    //
-    //      readResult must not beNull
-    //
-    //      readResult.bish must beEqualTo("foo")
-    //      readResult.bash must beSome(6)
-    //      readResult.bosh must beEqualTo(9)
-    //    }
+    "Support automatic mapping of Longs to Ints" in new CaseClassScope(
+      """ :bash 6 :bosh 9 """) {
+
+      val readResult = readIntoResult[IntsNotLongs]
+      readResult must not beNull
+
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
+    }
+
+    "Support Longs in case classes" in new CaseClassScope(
+      """ :bash 6 :bosh 9 """) {
+
+      val readResult = readIntoResult[AllLongs]
+      readResult must not beNull
+
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
+    }
+
+    "Support single-level mapping of mixed types" in new CaseClassScope(
+      """ :bish "foo" :bash 6 :bosh 9 """) {
+
+      val readResult = readIntoResult[MixedBunch]
+      readResult must not beNull
+
+      readResult.bish must beEqualTo("foo")
+      readResult.bash must beSome(6)
+      readResult.bosh must beEqualTo(9)
+    }
   }
 }
