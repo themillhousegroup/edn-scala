@@ -12,7 +12,6 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
   class CaseClassScope(s: String) extends ParserScope(s) {
 
     def readInto[T <: Product: TypeTag]: Try[T] = {
-      println(s"CCS: ${typeOf[T]}")
       p.readInto(values)
     }
 
@@ -22,16 +21,16 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
   }
 
-  case class CannotCreate(x: Int, y: String)
+  case class CannotCreate(x: String, y: String)
 
   "Reading EDN into case classes - flat structures -" should {
 
-    //    "Reject a case class that won't be instantiable" in new CaseClassScope(
-    //      """ :x "foo" :y "bar" """, classOf[CannotCreate]) {
-    //
-    //      readInto must beAFailedTry[CannotCreate].withThrowable[UnsupportedOperationException]
-    //    }
-    //
+    "Reject a case class that won't be instantiable" in new CaseClassScope(
+      """ :x "foo" :y "bar" """) {
+
+      readInto[CannotCreate] must beAFailedTry[CannotCreate].withThrowable[UnsupportedOperationException]
+    }
+
     "Support single-level mapping of simple strings" in new CaseClassScope(
       """ :bish "foo" :bash "bar" :bosh "baz" """) {
 
@@ -48,9 +47,6 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
 
       readInto[AllStrings] must beAFailedTry[AllStrings].withThrowable[IllegalArgumentException]
     }
-  }
-
-  "Reading EDN into case classes - flat structures with options -" should {
 
     "Support single-level mapping of optional strings - present" in new CaseClassScope(
       """ :bish "foo" :bash "bar" :bosh "baz" """) {

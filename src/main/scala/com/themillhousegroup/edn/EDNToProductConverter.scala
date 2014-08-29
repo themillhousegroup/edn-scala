@@ -12,9 +12,8 @@ object EDNToProductConverter {
   }
 
   private[this] def buildCaseClass[T: TypeTag](map: Map[String, AnyRef]): T = {
-    // rejectIfScoped(targetClass)
-
     val t = typeOf[T]
+    rejectIfScoped(t)
 
     val constructor = t.declarations.collectFirst {
       case m: MethodSymbol if m.isPrimaryConstructor => m
@@ -39,10 +38,11 @@ object EDNToProductConverter {
     c.getConstructors.head.newInstance(args: _*).asInstanceOf[T]
   }
 
-  private[this] def rejectIfScoped(targetClass: Class[_]) = {
-    if (targetClass.getDeclaredFields.exists(_.isSynthetic)) {
+  private[this] def rejectIfScoped(t: Type) = {
+    val TypeRef(pre, sym, _) = t
+    if (pre.toString.contains("this")) { // FIXME OMFG what? Gotta be a better detection mechanism than this...
       throw new UnsupportedOperationException(
-        s"Can't create an instance of ${targetClass.getName} - it's in the wrong scope")
+        s"Can't create an instance of ${sym} - is it an inner class?")
     }
   }
 
@@ -59,9 +59,7 @@ object EDNToProductConverter {
   }
 
   private[this] def isInt(t: Type) = {
-    val i = t.baseClasses.exists(_ == intType)
-    println(s"isInt: $t : $i")
-    i
+    t.baseClasses.exists(_ == intType)
   }
 
   private[this] def isJLong(fieldType: Class[_]) = {
