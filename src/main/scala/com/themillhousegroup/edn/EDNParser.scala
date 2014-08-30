@@ -58,7 +58,7 @@ class ScalaEDNParser(config: Config) {
     import scala.collection.JavaConverters._
     a match {
       case m: java.util.Map[AnyRef, AnyRef] => { mapHandler(immutableMap(m.asScala)) }
-      case m: java.util.List[AnyRef] => { traversableHandler(m.asScala) }
+      case m: java.util.List[AnyRef] => { traversableHandler(m.asScala.toList) }
       case m: java.util.Set[AnyRef] => { traversableHandler(m.asScala) }
       case o => o
     }
