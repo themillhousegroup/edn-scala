@@ -148,11 +148,12 @@ class ScalaEDNParser(config: Config) {
    * Fields in the target class MUST be present in the EDN, unless they
    * are Option types, in which case they will be set to None.
    *
+   * Case classes of arbitrary complexity (e.g. with lists, sets, maps,
+   * options, and other case classes nested inside) are supported.
+   *
    * @since 2.0.0
    */
   def readInto[T <: Product: TypeTag](pbr: Parseable): scala.util.Try[T] = {
-    println(s"readInto: ${typeOf[T]}")
-
     scala.util.Try(EDNToProductConverter(asMap(pbr)))
   }
 }

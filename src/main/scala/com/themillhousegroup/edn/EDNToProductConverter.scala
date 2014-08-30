@@ -49,14 +49,10 @@ object EDNToProductConverter {
 
   private[this] def hasClass(t: Type, desired: Symbol): Boolean = t.baseClasses.exists(_ == desired)
 
-  private[this] def isCaseClass(t: Type) =
+  private[this] def isCaseClass(t: Type): Boolean =
     t.baseClasses.exists {
       case cs: ClassSymbol => cs.isCaseClass
     }
-
-  private[this] def isOption(fieldType: Class[_]) = {
-    fieldType.isAssignableFrom(classOf[Option[_]])
-  }
 
   private[this] def isOption(t: Type) = hasClass(t, optionType)
 
@@ -66,26 +62,23 @@ object EDNToProductConverter {
     fieldType.isAssignableFrom(classOf[java.lang.Long])
   }
 
-  private[this] def findOptionTarget[O: TypeTag] = {
-    println("******:" + typeOf[Option[Int]])
-    println("***: " + typeOf[O])
+  private[this] def findOptionTarget(t: Type) = {
+    println(s"FOT: ${t.typeArgs}")
+    t.typeArgs.head
   }
 
-  private def matchOptionalField[F: TypeTag](fieldName: String, fieldType: Type, mapValue: Option[AnyRef]): Option[F] = {
+  private def matchOptionalField[F](fieldName: String, fieldType: Type, mapValue: Option[AnyRef]): Option[F] = {
     mapValue.fold {
       None.asInstanceOf[Option[F]]
     } { v =>
       // given that fieldType is an Option[X], find what X is...
-      //val optionTargetType =
-      //          println("Find ot of " + fieldType)
-      //          findOptionTarget[Option[F]]
-      //          val optionTargetType = fieldType
-      //          if (isProduct(optionTargetType)) {
-      //            println(s"Optional product: $fieldName $optionTargetType")
-      //            Some(buildCaseClass(v.asInstanceOf[Map[String, AnyRef]], optionTargetType))
-      //          } else {
-      Some(v.asInstanceOf[F])
-      //          }
+      val optionTargetType = findOptionTarget(fieldType)
+      println("Find ot of " + optionTargetType)
+      if (isCaseClass(optionTargetType)) {
+        Some(buildCaseClass(optionTargetType, v.asInstanceOf[Map[String, AnyRef]]))
+      } else {
+        Some(v.asInstanceOf[F])
+      }
     }
   }
 
@@ -102,12 +95,7 @@ object EDNToProductConverter {
         if (isInt(fieldType) && isJLong(v.getClass)) {
           v.asInstanceOf[Long].toInt.asInstanceOf[F]
         } else {
-          println(s"Matching ${fieldType.baseClasses} to ${v.getClass}")
-          //      if (fieldType =:= )
-
-          val i = v.asInstanceOf[F]
-          println(s"Returning ${v.getClass} as ${i.getClass} that needs to be a $fieldType")
-          i
+          v.asInstanceOf[F]
         }
       }
     }
