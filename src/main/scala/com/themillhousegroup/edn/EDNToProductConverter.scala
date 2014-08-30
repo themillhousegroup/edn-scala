@@ -8,11 +8,10 @@ object EDNToProductConverter {
   lazy val intType = typeOf[Int].typeSymbol
 
   def apply[T <: Product: TypeTag](map: Map[String, AnyRef]): T = {
-    buildCaseClass[T](map)
+    buildCaseClass[T](typeOf[T], map)
   }
 
-  private[this] def buildCaseClass[T: TypeTag](map: Map[String, AnyRef]): T = {
-    val t = typeOf[T]
+  private[this] def buildCaseClass[T: TypeTag](t: Type, map: Map[String, AnyRef]): T = {
     rejectIfScoped(t)
 
     val constructor = t.declarations.collectFirst {
