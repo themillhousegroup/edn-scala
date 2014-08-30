@@ -4,6 +4,8 @@ import scala.reflect.runtime.universe._
 
 object EDNToProductConverter {
 
+  lazy val productTrait = typeOf[Product].typeSymbol
+  lazy val equalsTrait = typeOf[Equals].typeSymbol
   lazy val optionType = typeOf[Option[_]].typeSymbol
   lazy val intType = typeOf[Int].typeSymbol
 
@@ -45,21 +47,21 @@ object EDNToProductConverter {
     }
   }
 
-  private[this] def isProduct(fieldType: Class[_]) = {
-    fieldType.getInterfaces.exists(classOf[Product] == _)
+  private[this] def hasClass(t: Type, desired: Symbol): Boolean = t.baseClasses.exists(_ == desired)
+
+  private[this] def isCaseClass(t: Type) = {
+    println(s"ICC: ${t.baseClasses}")
+    // A simple test for a case class - may be fooled by other things ...
+    hasClass(t, productTrait) && hasClass(t, equalsTrait)
   }
 
   private[this] def isOption(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[Option[_]])
   }
 
-  private[this] def isOption(t: Type) = {
-    t.baseClasses.exists(_ == optionType)
-  }
+  private[this] def isOption(t: Type) = hasClass(t, optionType)
 
-  private[this] def isInt(t: Type) = {
-    t.baseClasses.exists(_ == intType)
-  }
+  private[this] def isInt(t: Type) = hasClass(t, intType)
 
   private[this] def isJLong(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[java.lang.Long])
@@ -93,17 +95,17 @@ object EDNToProductConverter {
       // EDN does NOT contain a field with this keyword
       throw new IllegalArgumentException(s"Non-optional field '${fieldName}' was not found in the given EDN.")
     } { v =>
-      //      if (isProduct(fieldType)) {
-      //        buildCaseClass(v.asInstanceOf[Map[String, AnyRef]])
-      //      } else {
-      // EDN-Java tends to favour java.lang.Long where a case class would use an Int;
-      // make the conversion transparent:
-      if (isInt(fieldType) && isJLong(v.getClass)) {
-        v.asInstanceOf[Long].toInt.asInstanceOf[F]
+      if (isCaseClass(fieldType)) {
+        buildCaseClass(fieldType, v.asInstanceOf[Map[String, AnyRef]])
       } else {
-        v.asInstanceOf[F]
+        // EDN-Java tends to favour java.lang.Long where a case class would use an Int;
+        // make the conversion transparent:
+        if (isInt(fieldType) && isJLong(v.getClass)) {
+          v.asInstanceOf[Long].toInt.asInstanceOf[F]
+        } else {
+          v.asInstanceOf[F]
+        }
       }
-      //      }
     }
   }
 }
