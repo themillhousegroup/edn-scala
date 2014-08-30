@@ -2,8 +2,11 @@ package com.themillhousegroup.edn
 
 import scala.reflect.runtime.universe._
 import scala.collection.GenTraversableOnce
+import org.slf4j.LoggerFactory
 
 object EDNToProductConverter {
+
+  lazy val logger = LoggerFactory.getLogger(getClass)
   val m = runtimeMirror(getClass.getClassLoader)
 
   lazy val productTrait = typeOf[Product].typeSymbol
@@ -18,6 +21,8 @@ object EDNToProductConverter {
   private[this] def buildCaseClass[T: TypeTag](t: Type, map: Map[String, AnyRef]): T = {
     rejectIfScoped(t)
 
+    val camelCasedMap = camelCaseKeys(map)
+
     val constructor = t.declarations.collectFirst {
       case m: MethodSymbol if m.isPrimaryConstructor => m
     }.get
@@ -29,9 +34,9 @@ object EDNToProductConverter {
       val fieldType = field.typeSignature
 
       if (isOption(fieldType)) {
-        matchOptionalField(fieldName, fieldType, map.get(fieldName))
+        matchOptionalField(fieldName, fieldType, camelCasedMap.get(fieldName))
       } else {
-        matchRequiredField(fieldName, fieldType, map.get(fieldName))
+        matchRequiredField(fieldName, fieldType, camelCasedMap.get(fieldName))
       }.asInstanceOf[Object]
     }.toArray
 
@@ -45,6 +50,19 @@ object EDNToProductConverter {
       throw new UnsupportedOperationException(
         s"Can't create an instance of ${sym} - is it an inner class?")
     }
+  }
+
+  // EDN keys can have dashes and ?s in them (which are illegal for scala field names)
+  // So instances of these are converted into camelCase as Gosling intended :-)
+  private[this] def camelCaseKeys(map: Map[String, AnyRef]) = {
+    import com.google.common.base.CaseFormat._
+    map.map {
+      case (k, v) =>
+        val removedQuestionMarks = k.replaceAll("[?]", "")
+        val fixedDashes = LOWER_HYPHEN.to(LOWER_CAMEL, removedQuestionMarks)
+        logger.trace(s"Checking/converting $k to $fixedDashes")
+        fixedDashes -> v
+    }.toMap
   }
 
   private[this] def hasClass(t: Type, desired: Symbol): Boolean = t.baseClasses.exists(_ == desired)
