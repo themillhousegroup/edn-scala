@@ -122,5 +122,16 @@ class ReadIntoFlatCaseClassSpec extends Specification with EDNParsing {
       readResult.bash must containTheSameElementsAs(Seq("x", "y", "z"))
       readResult.bosh must beEqualTo(9)
     }
+
+    "Support single-level mapping where a member is a map" in new CaseClassScope(
+      """ :bish "foo" :bash {:x "eks" :y "wye" :z "zed" } :bosh 9 """) {
+
+      val readResult = readIntoResult[BasicWithMap]
+      readResult must not beNull
+
+      readResult.bish must beEqualTo("foo")
+      readResult.bash must havePairs("x" -> "eks", "y" -> "wye", "z" -> "zed")
+      readResult.bosh must beEqualTo(9)
+    }
   }
 }
