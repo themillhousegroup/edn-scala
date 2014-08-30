@@ -2,7 +2,7 @@ name := "edn-scala"
 
 organization := "com.themillhousegroup"
 
-version := "1.1.0"
+version := "2.0 .0"
 
 scalaVersion := "2.11.2"
 

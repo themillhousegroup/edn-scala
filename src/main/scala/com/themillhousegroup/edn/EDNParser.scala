@@ -148,7 +148,7 @@ class ScalaEDNParser(config: Config) {
    * Fields in the target class MUST be present in the EDN, unless they
    * are Option types, in which case they will be set to None.
    *
-   * @since 1.1.0
+   * @since 2.0.0
    */
   def readInto[T <: Product: TypeTag](pbr: Parseable): scala.util.Try[T] = {
     println(s"readInto: ${typeOf[T]}")
