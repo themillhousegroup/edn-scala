@@ -14,10 +14,13 @@ object CaseClassFixtures {
   case class BasicWithSet(bish: String, bash: Set[String], bosh: Int)
   case class BasicWithMap(bish: String, bash: Map[String, Int], bosh: Int)
 
+  // Case classes with another level of case classes within
   case class NestedJustOnce(contents: AllStrings)
   case class NestedWithFields(contents: AllStrings, a: Int, b: Int)
   case class NestedOptionally(contents: Option[AllStrings])
 
-  case class StringsAllTheWayDown(first: AllStrings, second: AllStrings)
+  // Multiply-nested case class
+  case class StringsAllTheWayDown(first: AllStrings, second: Option[AllStrings])
+  case class ThreeLevelsDeep(x: Int, y: Int, nest: Option[StringsAllTheWayDown])
 
 }

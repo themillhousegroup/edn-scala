@@ -63,7 +63,6 @@ object EDNToProductConverter {
   }
 
   private[this] def findOptionTarget(t: Type) = {
-    println(s"FOT: ${t.typeArgs}")
     t.typeArgs.head
   }
 
@@ -73,7 +72,6 @@ object EDNToProductConverter {
     } { v =>
       // given that fieldType is an Option[X], find what X is...
       val optionTargetType = findOptionTarget(fieldType)
-      println("Find ot of " + optionTargetType)
       if (isCaseClass(optionTargetType)) {
         Some(buildCaseClass(optionTargetType, v.asInstanceOf[Map[String, AnyRef]]))
       } else {

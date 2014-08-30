@@ -65,4 +65,63 @@ class ReadIntoNestedCaseClassSpec extends Specification with EDNParsing {
       readResult.contents must beNone
     }
   }
+
+  "Support double-nested optional case classes" in new CaseClassScope(
+    """ {
+      :first { :bish "foo" :bash "bar" :bosh "baz" }
+      :second { :bish "curly" :bash "larry" :bosh "moe" }
+    } """) {
+
+    val readResult = readIntoResult[StringsAllTheWayDown]
+
+    readResult must not beNull
+
+    readResult.first must beAnInstanceOf[AllStrings]
+    readResult.second must beSome[AllStrings]
+
+    val first = readResult.first
+
+    first.bish must beEqualTo("foo")
+    first.bash must beEqualTo("bar")
+    first.bosh must beEqualTo("baz")
+
+    val second = readResult.second.get
+
+    second.bish must beEqualTo("curly")
+    second.bash must beEqualTo("larry")
+    second.bosh must beEqualTo("moe")
+  }
+
+  "Support deeply-nested optional case classes - positive case" in new CaseClassScope(
+    """ {
+            :x 7 :y 11
+            :nest {
+              :first { :bish "foo" :bash "bar" :bosh "baz" }
+              :second { :bish "curly" :bash "larry" :bosh "moe" }
+           } } """) {
+
+    val readResult = readIntoResult[ThreeLevelsDeep]
+
+    readResult must not beNull
+
+    readResult.x must beEqualTo(7)
+    readResult.y must beEqualTo(11)
+    readResult.nest must beSome[StringsAllTheWayDown]
+
+    val nest = readResult.nest.get
+    nest.first must beAnInstanceOf[AllStrings]
+    nest.second must beSome[AllStrings]
+
+    val first = nest.first
+
+    first.bish must beEqualTo("foo")
+    first.bash must beEqualTo("bar")
+    first.bosh must beEqualTo("baz")
+
+    val second = nest.second.get
+
+    second.bish must beEqualTo("curly")
+    second.bash must beEqualTo("larry")
+    second.bosh must beEqualTo("moe")
+  }
 }
