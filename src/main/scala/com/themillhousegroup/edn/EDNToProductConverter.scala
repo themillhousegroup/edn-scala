@@ -1,11 +1,13 @@
 package com.themillhousegroup.edn
 
 import scala.reflect.runtime.universe._
+import scala.collection.GenTraversableOnce
 
 object EDNToProductConverter {
+  val m = runtimeMirror(getClass.getClassLoader)
 
   lazy val productTrait = typeOf[Product].typeSymbol
-  lazy val equalsTrait = typeOf[Equals].typeSymbol
+  lazy val genTraversableOnceTrait = typeOf[GenTraversableOnce[_]].typeSymbol
   lazy val optionType = typeOf[Option[_]].typeSymbol
   lazy val intType = typeOf[Int].typeSymbol
 
@@ -25,7 +27,6 @@ object EDNToProductConverter {
     val args = constructorArgs.map { field =>
       val fieldName = field.name.decoded
       val fieldType = field.typeSignature
-      println(s"arg: $fieldName: $fieldType")
 
       if (isOption(fieldType)) {
         matchOptionalField(fieldName, fieldType, map.get(fieldName))
@@ -34,7 +35,6 @@ object EDNToProductConverter {
       }.asInstanceOf[Object]
     }.toArray
 
-    val m = runtimeMirror(getClass.getClassLoader)
     val c = m.runtimeClass(t.typeSymbol.asClass)
     c.getConstructors.head.newInstance(args: _*).asInstanceOf[T]
   }
@@ -49,11 +49,10 @@ object EDNToProductConverter {
 
   private[this] def hasClass(t: Type, desired: Symbol): Boolean = t.baseClasses.exists(_ == desired)
 
-  private[this] def isCaseClass(t: Type) = {
-    println(s"ICC: ${t.baseClasses}")
-    // A simple test for a case class - may be fooled by other things ...
-    hasClass(t, productTrait) && hasClass(t, equalsTrait)
-  }
+  private[this] def isCaseClass(t: Type) =
+    t.baseClasses.exists {
+      case cs: ClassSymbol => cs.isCaseClass
+    }
 
   private[this] def isOption(fieldType: Class[_]) = {
     fieldType.isAssignableFrom(classOf[Option[_]])
@@ -103,7 +102,12 @@ object EDNToProductConverter {
         if (isInt(fieldType) && isJLong(v.getClass)) {
           v.asInstanceOf[Long].toInt.asInstanceOf[F]
         } else {
-          v.asInstanceOf[F]
+          println(s"Matching ${fieldType.baseClasses} to ${v.getClass}")
+          //      if (fieldType =:= )
+
+          val i = v.asInstanceOf[F]
+          println(s"Returning ${v.getClass} as ${i.getClass} that needs to be a $fieldType")
+          i
         }
       }
     }
