@@ -5,9 +5,11 @@ import us.bpsm.edn.parser.Parsers._
 import us.bpsm.edn.Keyword._
 import us.bpsm.edn.parser.Parser.Config
 import us.bpsm.edn.Keyword
-import scala.reflect.ClassTag
+import org.slf4j.LoggerFactory
 
 object EDNParser {
+
+  private[this] val logger = LoggerFactory.getLogger(getClass)
 
   def apply() = {
     new ScalaEDNParser(defaultConfiguration)
@@ -21,6 +23,22 @@ object EDNParser {
   implicit def sym2keyword(s: Symbol): Keyword = newKeyword(s.name)
 
   implicit def keyword2str(k: Keyword): String = k.getName
+
+  /**
+   * EDN keys can have dashes and ?s in them (which are illegal for Scala/Java field names)
+   * If the map is going to end up needing to be Scala-legal, instances of these can be
+   * converted here into camelCase as Gosling intended :-)
+   */
+  def ensureLegalKeys(map: Map[String, Any]) = {
+    import com.google.common.base.CaseFormat._
+    map.map {
+      case (k, v) =>
+        val removedQuestionMarks = k.replaceAll("[?]", "")
+        val fixedDashes = LOWER_HYPHEN.to(LOWER_CAMEL, removedQuestionMarks)
+        logger.trace(s"Checking/converting $k to $fixedDashes")
+        fixedDashes -> v
+    }.toMap
+  }
 }
 
 class ScalaEDNParser(config: Config) {

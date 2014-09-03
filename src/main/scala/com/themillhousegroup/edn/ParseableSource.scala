@@ -47,4 +47,8 @@ class ParseableSource(src: Source) extends Parseable {
     }
     unreadBuffer = Some(ch)
   }
+
+  override def toString = {
+    s"Parseable [${src.descr}]"
+  }
 }

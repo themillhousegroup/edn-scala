@@ -2,7 +2,12 @@ name := "edn-scala"
 
 organization := "com.themillhousegroup"
 
-version := "2.0 .0"
+
+/*  1.x: Basic functionality
+    2.x: Read-into case-class
+    3.x: Typesafe Config adapter
+*/
+version := "3.0.0"
 
 scalaVersion := "2.11.2"
 
@@ -12,6 +17,7 @@ libraryDependencies ++= Seq (
   "us.bpsm"               %   "edn-java"              % "0.4.4",
   "com.google.guava"      %   "guava"                 % "18.0",
   "ch.qos.logback"        %  "logback-classic"        % "1.1.2",
+  "com.typesafe"          %  "config"                 % "1.2.1",
   "org.scala-lang"        %   "scala-reflect"         % scalaVersion.value,
   "org.specs2"            %%  "specs2"                % "2.3.12" % "test",
   "org.mockito"           %   "mockito-all"           % "1.9.0" % "test"

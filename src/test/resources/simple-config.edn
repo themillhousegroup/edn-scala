@@ -1,33 +1,9 @@
 {
+  :simple-key               "simple-value"
+
   :http-server            {:port         10100
                            :context-path "/end_point"
-                           :join?        false}
+                           :join        false}
 
-  :logging                {:timestamp-pattern      "yyyy-MMM-dd HH:mm:ss.SSS ZZ"
-                           :appenders              {:standard-out {:enabled? true}}
-                           :shared-appender-config {:rolling {:enabled? true
-                                                              :path     "logs/shared-appender.log"
-                                                              :pattern  :daily}}
-                           :log-level              :info}
-
-
-  :icarus                 {:models      "com.example.domain.model"
-                           :schema-path "Storage_schema.xml"
-
-                           :pooling     "100,20,0,-1,-1,96000,username,60000,testOnBorrow,testWhileIdle"
-
-                           :connection  {:keyspace_host     "localhost"
-                                         :keyspace_port     "9160"
-                                         :keyspace_username "username"}
-
-                           :hsm         "hsm.edn"}
-
-
-  :nomad/environments     {"dev" {:icarus  {:crypt {}}
-                                  :logging {:log-level     :debug
-                                            :fmt-output-fn taoensso.timbre/default-fmt-output-fn
-                                            :appenders     {:standard-out {:enabled? true}}}}}
-
-  :nomad/private-file     #nomad/file "conf/config_overrides.edn"
-  }
+}
 

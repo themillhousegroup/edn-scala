@@ -7,7 +7,7 @@
                            :appenders              {:standard-out {:enabled? true}}
                            :shared-appender-config {:rolling {:enabled? true
                                                               :path     "logs/shared-appender.log"
-                                                              :pattern  :daily}}
+                                                              :pattern  "daily"}}
                            :log-level              :info}
 
 
@@ -25,9 +25,9 @@
 
   :nomad/environments     {"dev" {:icarus  {:crypt {}}
                                   :logging {:log-level     :debug
-                                            :fmt-output-fn taoensso.timbre/default-fmt-output-fn
+                                            :fmt-output-fn "taoenssotimbre"
                                             :appenders     {:standard-out {:enabled? true}}}}}
 
-  :nomad/private-file     #nomad/file "conf/config_overrides.edn"
+  :nomad/private-file     "nomad/file conf/config_overrides.edn"
   }
 
