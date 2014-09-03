@@ -57,14 +57,15 @@ object EDNConfigFactory {
    */
   private[this] def buildRecursiveJMap(scalaMap: Map[String, Any]): java.util.Map[String, Any] = {
     import scala.collection.JavaConverters._
+    import EDNParser._
 
     scalaMap.map {
 
-      case (k, v: Map[String, Any]) => k -> buildRecursiveJMap(v)
-      case (k, v: us.bpsm.edn.Keyword) => k -> v.getName // Avoid leading-colon problems
-      case (k, v: us.bpsm.edn.Symbol) => k -> v.getName // Avoid leading-colon problems
-      case (k, v: us.bpsm.edn.TaggedValue) => k -> s"${v.getTag.getName} ${v.getValue}" // Avoid leading-colon problems
-      case (k, v) => k -> v
+      case (k, v: Map[String, Any]) => removeIllegalCharacters(k) -> buildRecursiveJMap(v)
+      case (k, v: us.bpsm.edn.Keyword) => removeIllegalCharacters(k) -> v.getName // Avoid leading-colon problems
+      case (k, v: us.bpsm.edn.Symbol) => removeIllegalCharacters(k) -> v.getName // Avoid leading-colon problems
+      case (k, v: us.bpsm.edn.TaggedValue) => removeIllegalCharacters(k) -> s"${v.getTag.getName} ${v.getValue}" // Avoid leading-colon problems
+      case (k, v) => removeIllegalCharacters(k) -> v
 
     }.toMap.asJava
   }

@@ -53,6 +53,16 @@ class TypesafeConfigFactorySpec extends Specification {
       val httpServerCfg = cfg.getConfig("http-server")
 
       httpServerCfg must not beNull
+
+      val loggingCfg = cfg.getConfig("logging")
+
+      val sharedAppCfg = loggingCfg.getConfig("shared-appender-config")
+
+      val rolling = sharedAppCfg.getConfig("rolling")
+
+      rolling must not beNull
+
+      rolling.getBoolean("enabled") must beTrue
     }
   }
 }

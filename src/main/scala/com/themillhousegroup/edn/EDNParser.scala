@@ -33,12 +33,14 @@ object EDNParser {
     import com.google.common.base.CaseFormat._
     map.map {
       case (k, v) =>
-        val removedQuestionMarks = k.replaceAll("[?]", "")
+        val removedQuestionMarks = removeIllegalCharacters(k)
         val fixedDashes = LOWER_HYPHEN.to(LOWER_CAMEL, removedQuestionMarks)
         logger.trace(s"Checking/converting $k to $fixedDashes")
         fixedDashes -> v
     }.toMap
   }
+
+  def removeIllegalCharacters(s: String) = s.replaceAll("[?]", "")
 }
 
 class ScalaEDNParser(config: Config) {
