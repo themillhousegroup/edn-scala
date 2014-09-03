@@ -51,12 +51,19 @@ object EDNConfigFactory {
     configObject.toConfig
   }
 
+  /**
+   * Converts any nested scala maps to Java maps, also "correcting" any unusual edn-java types
+   * that would cause the Typesafe config factory to barf.
+   */
   private[this] def buildRecursiveJMap(scalaMap: Map[String, Any]): java.util.Map[String, Any] = {
     import scala.collection.JavaConverters._
 
     scalaMap.map {
+
       case (k, v: Map[String, Any]) => k -> buildRecursiveJMap(v)
       case (k, v: us.bpsm.edn.Keyword) => k -> v.getName // Avoid leading-colon problems
+      case (k, v: us.bpsm.edn.Symbol) => k -> v.getName // Avoid leading-colon problems
+      case (k, v: us.bpsm.edn.TaggedValue) => k -> s"${v.getTag.getName} ${v.getValue}" // Avoid leading-colon problems
       case (k, v) => k -> v
 
     }.toMap.asJava

@@ -46,7 +46,7 @@ class TypesafeConfigFactorySpec extends Specification {
 
     "Allow a reasonably-complicated config to be automatically loaded by basename as a typesafe.Config object" in {
 
-      val cfg = EDNConfigFactory.load("medium-config")
+      val cfg = EDNConfigFactory.load("config")
 
       cfg must not beNull
 
