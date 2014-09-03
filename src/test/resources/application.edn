@@ -1,0 +1,9 @@
+{
+  :simple-key               "simple-value"
+
+  :http-server            {:port         10100
+                           :context-path "/end_point"
+                           :join        false}
+
+}
+
