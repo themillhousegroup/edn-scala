@@ -6,6 +6,8 @@ import us.bpsm.edn.Keyword._
 import us.bpsm.edn.parser.Parser.Config
 import us.bpsm.edn.Keyword
 import org.slf4j.LoggerFactory
+import com.themillhousegroup.sausagefactory._
+import com.themillhousegroup.sausagefactory.reflection._
 
 object EDNParser {
 
@@ -25,19 +27,29 @@ object EDNParser {
   implicit def keyword2str(k: Keyword): String = k.getName
 
   /**
+   * Recursively convert all keys in this map into Java-legal field names
+   * @param map
+   * @return
+   */
+  def ensureLegalKeys(map: Map[String, Any]): Map[String, Any] = {
+    map.map {
+      case (k, v: Map[String, Any]) => legalizeKey(k) -> ensureLegalKeys(v)
+      case (k, v) => legalizeKey(k) -> v
+    }.toMap
+  }
+
+  /**
    * EDN keys can have dashes and ?s in them (which are illegal for Scala/Java field names)
    * If the map is going to end up needing to be Scala-legal, instances of these can be
    * converted here into camelCase as Gosling intended :-)
    */
-  def ensureLegalKeys(map: Map[String, Any]) = {
+  def legalizeKey(s: String) = {
     import com.google.common.base.CaseFormat._
-    map.map {
-      case (k, v) =>
-        val removedQuestionMarks = removeIllegalCharacters(k)
-        val fixedDashes = LOWER_HYPHEN.to(LOWER_CAMEL, removedQuestionMarks)
-        logger.trace(s"Checking/converting $k to $fixedDashes")
-        fixedDashes -> v
-    }.toMap
+
+    val removedQuestionMarks = removeIllegalCharacters(s)
+    val fixedDashes = LOWER_HYPHEN.to(LOWER_CAMEL, removedQuestionMarks)
+    logger.debug(s"Checking/converting $s to $fixedDashes")
+    fixedDashes
   }
 
   def removeIllegalCharacters(s: String) = s.replaceAll("[?]", "")
@@ -171,9 +183,28 @@ class ScalaEDNParser(config: Config) {
    * Case classes of arbitrary complexity (e.g. with lists, sets, maps,
    * options, and other case classes nested inside) are supported.
    *
+   * This functionality is a thin wrapper around
+   * https://github.com/themillhousegroup/sausagefactory
+   *
    * @since 2.0.0
    */
   def readInto[T <: Product: TypeTag](pbr: Parseable): scala.util.Try[T] = {
-    scala.util.Try(EDNToProductConverter(asMap(pbr)))
+    import com.themillhousegroup.sausagefactory.CaseClassConverter
+
+    val ednMap = asMap(pbr)
+    val legalMap = EDNParser.ensureLegalKeys(ednMap)
+    println(s"legalMap: $legalMap")
+
+    CaseClassConverter[T](legalMap, AlwaysMakeJavaLongsIntoInts)
+  }
+
+  private object AlwaysMakeJavaLongsIntoInts extends FieldConverter with ReflectionHelpers {
+    override def convert[F](t: Type, v: Any): F = {
+      if (isInt(t) && isJLong(v.getClass)) {
+        v.asInstanceOf[Long].toInt.asInstanceOf[F]
+      } else {
+        v.asInstanceOf[F]
+      }
+    }
   }
 }

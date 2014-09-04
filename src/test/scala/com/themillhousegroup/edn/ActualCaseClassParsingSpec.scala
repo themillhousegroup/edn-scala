@@ -38,11 +38,9 @@ class ActualCaseClassParsingSpec extends Specification {
       val rollingConfig = result.logging.sharedAppenderConfig("rolling")
       rollingConfig must not beEmpty
 
-      // Note some of the quirks here because this is a map that has not
-      // had the conversion into java-compatible key names
-
-      rollingConfig("enabled?").asInstanceOf[Boolean] must beTrue
+      rollingConfig("enabled").asInstanceOf[Boolean] must beTrue
       rollingConfig("path") must beEqualTo("logs/shared-appender.log")
+      // Note the quirk here - a "special" value doesn't get any kind of conversion
       rollingConfig("pattern") must beEqualTo(us.bpsm.edn.Keyword.newKeyword("daily"))
     }
 
