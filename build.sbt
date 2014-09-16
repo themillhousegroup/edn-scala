@@ -7,11 +7,9 @@ organization := "com.themillhousegroup"
     2.x: Read-into case-class
     3.x: Typesafe Config adapter
 */
-version := "3.1.0"
+version := "4.0.0"
 
 scalaVersion := "2.11.2"
-
-crossScalaVersions := Seq("2.10.4", "2.11.2")
 
 libraryDependencies ++= Seq (
   "us.bpsm"               %   "edn-java"              % "0.4.4",
