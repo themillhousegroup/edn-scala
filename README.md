@@ -1,6 +1,8 @@
 edn-scala
 =========
 
+[![Build Status](https://travis-ci.org/themillhousegroup/edn-scala.svg?branch=master)](https://travis-ci.org/themillhousegroup/edn-scala)
+
 A Scala wrapper around [edn-java](https://github.com/bpsm/edn-java); Provides some Scala sugar for
 accessing [EDN](https://github.com/edn-format/edn) formatted data.
 
