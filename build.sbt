@@ -31,5 +31,7 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 seq(bintraySettings:_*)
 
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+
 scalariformSettings
 
