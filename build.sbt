@@ -6,8 +6,9 @@ organization := "com.themillhousegroup"
 /*  1.x: Basic functionality
     2.x: Read-into case-class
     3.x: Typesafe Config adapter
+    4.x: Scala 2.11 only, using SausageFactory (https://github.com/themillhousegroup/sausagefactory) for Map->Case Class conversion
 */
-version := "4.0.0"
+version := s"${sys.props.getOrElse("build.majorMinor", "4.0")}.${sys.props.getOrElse("build.version", "SNAPSHOT")}"
 
 scalaVersion := "2.11.2"
 
