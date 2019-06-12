@@ -46,7 +46,7 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "edn-scala" % "4.0.0"
+     "com.themillhousegroup" %% "edn-scala" % "4.1.0"
    )
 
 ```
