@@ -26,11 +26,11 @@ resolvers ++= Seq(
     "millhouse-bintray" at "http://dl.bintray.com/themillhousegroup/maven"
 )
 
-jacoco.settings
+// jacoco.settings
 
-seq(bintraySettings:_*)
+// seq(bintraySettings:_*)
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
-scalariformSettings
+// scalariformSettings
 
