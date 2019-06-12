@@ -17,13 +17,13 @@ libraryDependencies ++= Seq (
   "com.google.guava"      %   "guava"                 % "18.0",
   "ch.qos.logback"        %  "logback-classic"        % "1.1.2",
   "com.typesafe"          %  "config"                 % "1.2.1",
-  "com.themillhousegroup" %% "sausagefactory"         % "0.2.0",
+  "com.themillhousegroup" %% "sausagefactory"         % "0.4.50",
   "org.specs2"            %%  "specs2"                % "2.3.12" % "test",
   "org.mockito"           %   "mockito-all"           % "1.9.0" % "test"
 )
 
 resolvers ++= Seq(
-    "millhouse-releases" at "http://repository-themillhousegroup.forge.cloudbees.com/release"
+    "millhouse-bintray" at "http://dl.bintray.com/themillhousegroup/maven"
 )
 
 jacoco.settings

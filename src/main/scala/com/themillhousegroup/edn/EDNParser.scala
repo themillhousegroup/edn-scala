@@ -8,6 +8,7 @@ import us.bpsm.edn.Keyword
 import org.slf4j.LoggerFactory
 import com.themillhousegroup.sausagefactory._
 import com.themillhousegroup.sausagefactory.reflection._
+import com.themillhousegroup.sausagefactory.CaseClassConverter.FieldConverter
 
 object EDNParser {
 
@@ -55,7 +56,7 @@ object EDNParser {
   def removeIllegalCharacters(s: String) = s.replaceAll("[?]", "")
 }
 
-class ScalaEDNParser(config: Config) {
+class ScalaEDNParser(config: Config) extends ReflectionHelpers {
   val javaParser = Parsers.newParser(config)
 
   private def isFinished(o: AnyRef) = Parser.END_OF_INPUT.equals(o)
@@ -198,13 +199,9 @@ class ScalaEDNParser(config: Config) {
     CaseClassConverter[T](legalMap, AlwaysMakeJavaLongsIntoInts)
   }
 
-  private object AlwaysMakeJavaLongsIntoInts extends FieldConverter with ReflectionHelpers {
-    override def convert[F](t: Type, v: Any): F = {
-      if (isInt(t) && isJLong(v.getClass)) {
-        v.asInstanceOf[Long].toInt.asInstanceOf[F]
-      } else {
-        v.asInstanceOf[F]
-      }
+  val AlwaysMakeJavaLongsIntoInts: FieldConverter = {
+    case(t: Type, v: Any) if (isInt(t) && isJLong(v.getClass)) => {
+        v.asInstanceOf[Long].toInt
     }
   }
 }
