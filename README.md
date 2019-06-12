@@ -53,7 +53,7 @@ Bring in the library by adding the following to your ```build.sbt```.
 
 #### A note on Scala versions
 Versions of the library up to __3.1.0__ were cross-built for Scala 2.10.4 and 2.11.2, but from __4.x.x__ onwards, only Scala > 2.11.2 is supported. If you intend to use the
-read-into-case-class functionality, `scala-reflect` seems to be much more reliable in Scala 2.11, so please use __4.0.0__. 
+read-into-case-class functionality, `scala-reflect` seems to be much more reliable in Scala 2.11, so please use __4.1.0__. 
 
 ## Usage
 
